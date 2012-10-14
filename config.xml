@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+    <widget xmlns = "http://www.w3.org/ns/widgets"
+        xmlns:gap = "http://phonegap.com/ns/1.0"
+        id        = "com.ucv.georef"
+        versionCode="10" 
+        version   = "0.1.0">
+
+    <!-- versionCode is optional and Android only -->
+
+    <name>Georef Beta</name>
+
+    <description>
+        Un Beta de la aplicacion Georef 
+    </description>
+
+    <author href="https://andev.260mb.org" email="andrew4d3@gmail.com">
+        Andrew Davis
+    </author>
+
+</widget>

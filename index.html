@@ -1,0 +1,176 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>GeoRef</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="css/jquery.mobile-1.1.1.min.css" />
+        <script src="js/cordova-2.1.0.js"></script>
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery.mobile-1.1.1.min.js"></script>
+        <script src="js/useful_functions.js"></script>
+        <script src="js/main.js"></script>
+        <script>          
+            $(document).ready(function(){
+                
+                
+                if(localStorage.getItem('auto')=="true"){
+                    
+                    sessionStorage.setItem('user',localStorage.getItem('auto-user'));
+                    location.href="sesion.html";
+                }
+                
+                
+                $("#sesion").submit(function(e){
+                    
+                   e.stopImmediatePropagation();
+                   e.preventDefault();
+                   
+                   console.log("hola");
+                   user=$("#user").val();
+                   pass=$("#pass").val();
+                   if($('#auto').val()==="on"){
+                       auto=true;
+                   }
+                   else{
+                       auto=false;
+                   }
+                   autentica_usuario(user, pass, auto);
+                   
+                   
+                   
+                });
+                 $("#crear_usuario").submit(function(e){
+                   
+                   e.stopImmediatePropagation();
+                   e.preventDefault();
+                   
+                   user_input=$("#user_input").val();
+                   pass_input=$("#pass_input").val();
+                   pass_conf=$("#pass_conf").val();
+                   
+                   //alert(user_input +" "+pass_input+" "+pass_conf);
+                   
+                   if(user_input.length<6 || user_input.length > 12){
+                       alert("Tamaño de usuario Invalido\nMinimo: 6 caracters. Maximo: 12 caracteres");
+                   }
+                   else if(/\s/g.test(user_input)){
+                       alert("Su nombre de usuario no puede tener espacios en blanco");
+                   }
+                   else if(pass_input.length<6 || pass_input.length > 12){
+                       alert("Tamaño de Contraseña Invalido\nMinimo: 6 caracters. Maximo: 12 caracteres");
+                   }
+                   else if(pass_input!=pass_conf){
+                       $(":password").val("");
+                       alert("Las contraseñas introducidas no coinciden")    
+                   }
+                   else{
+                       crear_usuario(user_input, pass_input);
+                   }
+
+                   
+                   
+                   
+                });
+ 
+ 
+            });
+        </script>
+    </head>
+    <body>
+<!-- Home -->
+<div data-role="page" id="login">
+   <div data-theme="a" data-role="header">
+      <h3>
+         GeoRef
+      </h3>
+   </div>
+   <div data-role="content" style="padding: 15px">
+       <form id="sesion" >
+         <div data-role="fieldcontain">
+            <fieldset data-role="controlgroup">
+               <label for="textinput5">
+                  Usuario
+               </label>
+               <input id="user" placeholder="" value="" type="text">
+            </fieldset>
+         </div>
+         <div data-role="fieldcontain">
+            <fieldset data-role="controlgroup">
+               <label for="textinput6">
+                  Contraseña
+               </label>
+                <input id="pass" placeholder="" value="" type="password">
+            </fieldset>
+         </div>
+           
+        
+        <div style="text-align: center">                
+            <label>Conectar automaticamente</label>
+            <select id="auto" data-role="slider">
+                    <option value="off">No</option>
+                    <option value="on">Si</option>
+            </select>
+        </div>        
+         <input type="submit" value="Iniciar Sesión">
+      </form>
+      <a data-role="button" data-transition="fade" href="#nuevo_usuario">
+         Crear Usuario
+      </a>
+   </div>
+</div>
+
+
+<div data-role="page" id="nuevo_usuario">
+    <div data-theme="a" data-role="header">
+        <h3>
+            Nuevo Usuario
+        </h3>
+    </div>
+    <div data-role="content" style="padding: 15px">
+        <form id="crear_usuario">
+            <div data-role="fieldcontain">
+                <fieldset data-role="controlgroup">
+                    <label for="textinput2">
+                        Nombre de Usuario
+                    </label>
+                    <input id="user_input" placeholder="6 caracteres mínimo 12 máximo" value=""
+                    type="text">
+                </fieldset>
+            </div>
+            <div data-role="fieldcontain">
+                <fieldset data-role="controlgroup">
+                    <label for="textinput3">
+                        Contraseña
+                    </label>
+                    <input id="pass_input" placeholder="6 caracteres mínimo 12 máximo" value="" type="password">
+                </fieldset>
+            </div>
+            <div data-role="fieldcontain">
+                <fieldset data-role="controlgroup">
+                    <label for="textinput4">
+                        Repetir Contraseña
+                    </label>
+                    <input id="pass_conf" placeholder="" value="" type="password">
+                </fieldset>
+            </div>
+            <input type="submit" value="Crear Usuario">
+            <a data-role="button" data-transition="fade" href="#login">
+                Cancelar
+            </a>
+        </form>
+    </div>
+    <div data-theme="a" data-role="footer" data-position="fixed">
+
+    </div>
+</div>
+
+
+
+
+    </body>
+</html>

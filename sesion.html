@@ -1,0 +1,67 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>GeoRef</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="css/jquery.mobile-1.1.1.min.css" />
+        <script src="js/cordova-2.1.0.js"></script>
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery.mobile-1.1.1.min.js"></script>
+        <script src="js/useful_functions.js"></script>
+        <script src="js/main.js"></script>
+        <script>
+            
+            if(sessionStorage.getItem('user')===""){
+                location.href="index.html";
+            }
+            
+            
+            $(document).ready(function(){
+                
+                user=sessionStorage.getItem('user');
+                
+                $("#cerrar").click(function(){
+                   
+                   localStorage.setItem('auto',"false");
+                   sessionStorage.setItem('user',"");
+                   
+                   location.href="index.html";
+                });
+                
+                
+
+            });
+        </script>
+    </head>
+    <body>
+        <div data-role="page" id="home">
+    <div data-role="header">
+	<a href="#" id="cerrar" data-icon="delete">Cerrar Sesión</a>
+	<h1></h1>
+	<a href="#" data-icon="check">Configuración</a>
+    </div>
+    
+            
+            
+    <div data-role="content" style="padding: 15px">
+        
+        <div>
+            <a href="#">Nuevo Sitio</a><br />
+            <a data-ajax="false" href="map.html#mappage">Mapa</a><br />
+            <a href="#">Hacer Check-in</a><br />
+            <a href="#">Mis Sitios</a><br />
+            <a href="#">Sincronizar</a><br />
+
+            
+        </div>
+        
+        
+    </div>
+        </div>
+    </body>
+</html>
