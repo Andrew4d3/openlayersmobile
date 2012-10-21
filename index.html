@@ -15,70 +15,74 @@ and open the template in the editor.
         <script src="js/useful_functions.js"></script>
         <script src="js/main.js"></script>
         <script>          
-            $(document).ready(function(){
+            
+            document.addEventListener("deviceready", onDeviceReady, false);
+            
+            function onDeviceReady() {
+                console.log("Dispositivo Listo!");
+                init_db();
+                $(document).ready(function(){
                 
-                
-                if(localStorage.getItem('auto')=="true"){
-                    
-                    sessionStorage.setItem('user',localStorage.getItem('auto-user'));
-                    location.href="sesion.html";
-                }
-                
-                
-                $("#sesion").submit(function(e){
-                    
-                   e.stopImmediatePropagation();
-                   e.preventDefault();
-                   
-                   console.log("hola");
-                   user=$("#user").val();
-                   pass=$("#pass").val();
-                   if($('#auto').val()==="on"){
-                       auto=true;
-                   }
-                   else{
-                       auto=false;
-                   }
-                   autentica_usuario(user, pass, auto);
-                   
-                   
-                   
-                });
-                 $("#crear_usuario").submit(function(e){
-                   
-                   e.stopImmediatePropagation();
-                   e.preventDefault();
-                   
-                   user_input=$("#user_input").val();
-                   pass_input=$("#pass_input").val();
-                   pass_conf=$("#pass_conf").val();
-                   
-                   //alert(user_input +" "+pass_input+" "+pass_conf);
-                   
-                   if(user_input.length<6 || user_input.length > 12){
-                       alert("Tamaño de usuario Invalido\nMinimo: 6 caracters. Maximo: 12 caracteres");
-                   }
-                   else if(/\s/g.test(user_input)){
-                       alert("Su nombre de usuario no puede tener espacios en blanco");
-                   }
-                   else if(pass_input.length<6 || pass_input.length > 12){
-                       alert("Tamaño de Contraseña Invalido\nMinimo: 6 caracters. Maximo: 12 caracteres");
-                   }
-                   else if(pass_input!=pass_conf){
-                       $(":password").val("");
-                       alert("Las contraseñas introducidas no coinciden")    
-                   }
-                   else{
-                       crear_usuario(user_input, pass_input);
-                   }
+                    if(localStorage.getItem('auto')=="true"){
 
-                   
-                   
-                   
+                        sessionStorage.setItem('user',localStorage.getItem('auto-user'));
+                        sessionStorage.setItem('user-id',localStorage.getItem('auto-user-id'));
+                        location.href="sesion.html";
+                    }
+
+                    $("#sesion").submit(function(e){
+                        e.stopImmediatePropagation();
+                        e.preventDefault();
+
+                        //console.log("hola");
+                        user=$("#user").val();
+                        pass=$("#pass").val();
+                        if($('#auto').val()==="on"){
+                            auto=true;
+                        }
+                        else{
+                            auto=false;
+                        }
+                        autentica_usuario(user, pass, auto);
+                    });
+                    
+                    $("#crear_usuario").submit(function(e){
+
+                        e.stopImmediatePropagation();
+                        e.preventDefault();
+
+                        user_input=$("#user_input").val();
+                        pass_input=$("#pass_input").val();
+                        pass_conf=$("#pass_conf").val();
+
+                        //alert(user_input +" "+pass_input+" "+pass_conf);
+
+                        if(user_input.length<6 || user_input.length > 12){
+                            alert("Tamaño de usuario Invalido\nMinimo: 6 caracters. Maximo: 12 caracteres");
+                        }
+                        else if(/\s/g.test(user_input)){
+                            alert("Su nombre de usuario no puede tener espacios en blanco");
+                        }
+                        else if(pass_input.length<6 || pass_input.length > 12){
+                            alert("Tamaño de Contraseña Invalido\nMinimo: 6 caracters. Maximo: 12 caracteres");
+                        }
+                        else if(pass_input!=pass_conf){
+                            $(":password").val("");
+                            alert("Las contraseñas introducidas no coinciden")    
+                        }
+                        else{
+                            crear_usuario(user_input, pass_input);
+                        }
+
+                    });
+ 
+ 
                 });
- 
- 
-            });
+                
+                
+            }
+            
+            
         </script>
     </head>
     <body>

@@ -23,7 +23,7 @@ function fixContentHeight() {
             selectedFeature = feature; 
             $.mobile.changePage("#popup", "pop"); 
         });
-        initLayerList();
+        //initLayerList();
     }
 }
 

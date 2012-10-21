@@ -14,32 +14,52 @@ and open the template in the editor.
         <script src="js/jquery.mobile-1.1.1.min.js"></script>
         <script src="js/useful_functions.js"></script>
         <script src="js/main.js"></script>
+        <script src="js/modelo.js"></script>
+        <script src="js/controlador.js"></script>
         <script>
             
-            if(sessionStorage.getItem('user')===""){
-                location.href="index.html";
+            document.addEventListener("deviceready", onDeviceReady, false);
+            
+            function onDeviceReady(){
+                init_db();
+                if(sessionStorage.getItem('user')===""){
+                    location.href="index.html";
+                }
+
+
+                $(document).ready(function(){
+
+                    user=sessionStorage.getItem('user');
+
+                    $("#cerrar").click(function(){
+
+                        localStorage.setItem('auto',"false");
+                        sessionStorage.setItem('user',"");
+
+                        location.href="index.html";
+                    });
+                    
+                    
+                    $('a[href="#alertas"]').click(function(){
+                        lista = new Alertas();
+                        
+                        
+                        lista.listar(2,ordenarAlertas);
+                    
+                    });
+                    
+                    
+
+
+                });
+                
             }
             
             
-            $(document).ready(function(){
-                
-                user=sessionStorage.getItem('user');
-                
-                $("#cerrar").click(function(){
-                   
-                   localStorage.setItem('auto',"false");
-                   sessionStorage.setItem('user',"");
-                   
-                   location.href="index.html";
-                });
-                
-                
-
-            });
         </script>
     </head>
     <body>
-        <div data-role="page" id="home">
+    <div data-role="page" id="home">
     <div data-role="header">
 	<a href="#" id="cerrar" data-icon="delete">Cerrar Sesión</a>
 	<h1></h1>
@@ -56,12 +76,38 @@ and open the template in the editor.
             <a href="#">Hacer Check-in</a><br />
             <a href="#">Mis Sitios</a><br />
             <a href="#">Sincronizar</a><br />
+            <a href="#alertas">Mis Alertas</a><br />
 
             
         </div>
         
         
     </div>
+        
+    </div>
+    
+    <div data-role="page" id="alertas">
+        <div data-role="header">
+            <a href="#home" id="regresar" data-icon="back">Volver</a>
+            <h1>Alertas</h1>
         </div>
+        
+        <div id="lista-alertas" data-role="collapsible-set">
+            <!--
+            <h3>Tienes 2 nuevas alertas</h3>
+            <div data-role="collapsible" >
+                <h3>Section 1</h3>
+                <p>I'm the collapsible set content for section 1.</p>
+            </div>
+
+            <div data-role="collapsible">
+                <h3>Section 2</h3>
+                <p>I'm the collapsible set content for section 2.</p>
+            </div>
+            -->
+        </div>
+        
+    </div>     
+   
     </body>
 </html>
