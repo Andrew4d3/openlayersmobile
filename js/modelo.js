@@ -16,13 +16,13 @@ a.listar(2,function(alertas){
 
 
 */
-
+/*
 a = new Alertas();
 //a.crear(2, "puyol", "Hoy marcamos 2 goles e igual sufrimos", "02/12/2012", 0, 1,232);
 a.crear(2, "Valdes", "Hoy la cague en la porteria", "02/12/2012", 0, 1,233);
 a.crear(2, "Messi", "Hoy me volvi a llevar la pelota", "03/12/2012", 0, 1,234);
 a.crear(2, "Alba", "Hoy meti un golazo normal y un autogolazo de leyenda", "04/12/2012", 0, 1,235);
-
+*/
 
 
 /** CLASE DE alertas **/
