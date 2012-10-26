@@ -264,3 +264,20 @@ function utf8_encode (argString) {
  
     return utftext;
 }
+
+function formatearFecha(fecha_hora){
+    
+    fecha = fecha_hora.getDate()+"/";
+    fecha += fecha_hora.getMonth()+1+"/";
+    fecha += fecha_hora.getFullYear()+" ";
+    fecha += fecha_hora.getHours()+":";
+    fecha += zeroPad(fecha_hora.getMinutes(),2);
+    
+    
+    return fecha;
+}
+
+function zeroPad(num, places) {
+  var zero = places - num.toString().length + 1;
+  return Array(+(zero > 0 && zero)).join("0") + num;
+}

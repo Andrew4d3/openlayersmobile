@@ -8,14 +8,17 @@ and open the template in the editor.
         <title>GeoRef</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="css/jquery.mobile-1.1.1.min.css" />
-        <script src="js/cordova-2.1.0.js"></script>
-        <script src="js/jquery.min.js"></script>
-        <script src="js/jquery.mobile-1.1.1.min.js"></script>
-        <script src="js/useful_functions.js"></script>
+        <link rel="stylesheet" href="css/jquery.mobile-1.2.0.min.css" />
+        <script src="js/lib/cordova-2.1.0.js"></script>
+        <script src="js/lib/jquery.min.js"></script>
+        <script src="js/lib/jquery.mobile-1.2.0.min.js"></script>
+        <script src="js/lib/useful_functions.js"></script>
         <script src="js/main.js"></script>
         <script src="js/modelo.js"></script>
         <script src="js/controlador.js"></script>
+        <style>
+             
+        </style>
         <script>
             
             document.addEventListener("deviceready", onDeviceReady, false);
@@ -42,13 +45,18 @@ and open the template in the editor.
                     
                     $('a[href="#alertas"]').click(function(){
                         lista = new Alertas();
-                        
-                        
-                        lista.listar(2,ordenarAlertas);
+                       
+                        lista.listar(sessionStorage.getItem('user-id'),ordenarAlertas);
                     
                     });
                     
+                    $('a[href="#nuevo_sitio"]').click(function(e){
+                        
+                        e.stopImmediatePropagation();
+                        nuevoSitio();
+
                     
+                    });
 
 
                 });
@@ -71,12 +79,12 @@ and open the template in the editor.
     <div data-role="content" style="padding: 15px">
         
         <div>
-            <a href="#">Nuevo Sitio</a><br />
+            <a href="#nuevo_sitio">Nuevo Sitio</a><br />
             <a data-ajax="false" href="map.html#mappage">Mapa</a><br />
             <a href="#">Hacer Check-in</a><br />
-            <a href="#">Mis Sitios</a><br />
-            <a href="#">Sincronizar</a><br />
-            <a href="#alertas">Mis Alertas</a><br />
+            <a href="#">Sitios y Checkpoints</a><br />
+            <a href="#" >Sincronizar</a><br />
+            <a href="#alertas">Alertas</a><br />
 
             
         </div>
@@ -88,7 +96,7 @@ and open the template in the editor.
     
     <div data-role="page" id="alertas">
         <div data-role="header">
-            <a href="#home" id="regresar" data-icon="back">Volver</a>
+            <a href="#home" class="regresar" data-icon="back">Volver</a>
             <h1>Alertas</h1>
         </div>
         
@@ -107,7 +115,79 @@ and open the template in the editor.
             -->
         </div>
         
-    </div>     
+    </div>
+        
+    <div data-role="page" id="nuevo_sitio">
+        <div data-role="header">
+            <a href="#home" class="regresar" data-icon="back">Volver</a>
+            <h1>Nuevo Sitio</h1>
+        </div>
+        
+        <div id="sitio-container">
+            <p>Se procedera a agregar el sitio donde se encuentra actualmente. El cual cuenta con las siguientes caracteristicas:</p>
+            <div id="datos-coordenadas">
+                
+            </div>
+     
+        </div>
+        
+        <div data-role="footer" data-position="fixed" data-fullscreen="true" style="margin-top: 10px">
+            
+            <div data-role="navbar"  data-iconpos="right">
+                    <ul>
+                        <li><a href="#nuevo_sitio" class="actualizar" data-icon="refresh">Actualizar Posición</a></li>
+                        <li><a href="#crear_sitio" class="continuar" data-icon="arrow-r">Continuar</a></li>
+                            
+                    </ul>
+            </div>
+           
+	</div>
+        
+        
+        
+    </div> 
+
+    <div data-role="page" id="crear_sitio">
+        <div data-role="header">
+            <a href="#home" class="regresar" data-icon="back">Cancelar</a>
+            <h1>Nuevo Sitio</h1>
+        </div>
+        
+        <form id="sitio_form" style="margin-top: 10px">
+            <div data-role="fieldcontain">
+                <label for="basic">Nombre:</label><input required type="text" maxlength="20" name="nombre" id="nombre" data-mini="true" placeholder="Campo requerido" title="El sitio a crear tiene que tener un nombre que lo identifique"/>
+                <label for="basic">Descripcion:</label><input type="text" maxlength="600" name="descripcion" id="descripcion" data-mini="true" placeholder="Campo opcional"/>
+            
+                <label for="opciones-categorias" class="select">Categoria:</label>
+                <select name="opciones-categorias" id="opciones-categorias">
+                    <option value="null">(Sin Categoría)</option>
+                    <option value="new">Otra (Crear categoría)</option>
+                </select>
+            
+                <label for="basic">Fotografía (Opcional):</label>
+                <a href="#" data-role="button" data-icon="star" data-mini="true" data-inline="true">Abrir Camara</a>
+            
+            </div>
+            <input type="submit" value="Crear Sitio">
+        </form>
+        
+        <div  id="nueva_categoria" data-role="popup">
+            <div data-role="header">
+                <h5>Nueva <br/>Categoría</h5>
+            </div>
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            <form style="margin:10px">
+                <label for="basic">Nombre de categoría:</label><input required type="text" name="nombre" id="nombre_cat" data-mini="true" placeholder="Requerido" title="Un nombre para la categoría es requerido" maxlength="20"/>
+                <label for="basic">Descripción de categoría:</label><input type="text" name="descripcion_cat" id="descripcion_cat" data-mini="true" placeholder="Opcional" maxlength="100"/>
+                <input type="submit" value="Crear Categoria">
+            </form>
+        </div>
+        
+        
+        
+    </div>
+       
+    
    
     </body>
 </html>

@@ -114,3 +114,220 @@ function Alertas(){
     
     
 }
+
+
+/************** CLASE SITIOS ***************/
+
+function sitio (id, id_usuario, latitud, longitud, fecha, nombre, descripcion, url_imagen, id_categoria, sincronizado, servidor_id) {
+    this.id = id;
+    this.id_usuario = id_usuario;
+    this.latitud = latitud;
+    this.longitud = longitud;
+    this.fecha = fecha;
+    this.nombre = nombre;
+    this.descripcion = descripcion;
+    this.url_imagen = url_imagen;
+    this.id_categoria = id_categoria;
+    this.sincronizado = sincronizado;
+    this.servidor_id = servidor_id;
+    
+   
+    this.actualizar = function() {
+        
+        //El usuario solo esta permitido a modificar las variables visto y sincronizado
+        var query = "UPDATE alertas SET visto="+this.visto+", "+"sincronizado="+this.sincronizado+" WHERE id="+this.id;
+        //console.log(query);
+        
+        db.transaction(function(tx){
+            tx.executeSql(query);
+        })
+    };
+    
+    this.borrar = function() {
+        
+        
+        var query = "DELETE FROM alertas WHERE id="+this.id;
+        //console.log(query);
+        db.transaction(function(tx){
+            tx.executeSql(query);
+        })
+    };
+    
+       
+}
+
+s = new Sitios();
+//s.crear(2,10.474577130065,-66.89487218575,'21/12/2012 13:30','Las ciencias','Calle por ahi',null,null,0,null);
+
+function Sitios(){
+
+    
+    this.crear = function(id_usuario, latitud, longitud, fecha, nombre, descripcion, url_imagen, id_categoria, sincronizado, servidor_id){
+        
+        var query = "INSERT INTO sitios(id_usuario, latitud, longitud, fecha, nombre, descripcion, url_imagen, id_categoria, sincronizado, servidor_id) VALUES("+id_usuario+","+latitud+","+longitud+",'"+fecha+"','"+nombre+"','"+descripcion+"','"+url_imagen+"',"+id_categoria+","+sincronizado+","+servidor_id+")";
+        
+        //console.log(query);
+            
+         db.transaction(function(tx){
+            tx.executeSql(query);
+            //console.log(query);
+        })
+    }
+    
+   
+   //Lista todas los sitios de un usuario
+    this.listarU = function(id_usuario,callback){
+        
+        var query = "SELECT * FROM sitios WHERE id_usuario="+id_usuario;
+        //console.log(query);
+        return;
+        db.transaction(function(tx){
+            tx.executeSql(query,[],function(tx,result){
+                n = result.rows.length;
+                var alertas = new Array(n);
+                
+                for(i = 0; i< n; i++){
+                    
+                    item = result.rows.item(i);
+                    alertas[i] = new alerta(item.id,item.id_usuario,item.supervisor,item.mensaje,item.fecha,item.visto,item.sincronizado,item.servidor_id);
+                    
+                    //console.log(alertas[i]);
+                    
+                }
+                
+                callback(alertas);
+            });
+            
+            
+            
+        })
+    }
+    
+     this.listarC = function(id_usuario, id_categoria, callback){
+        
+        var query = "SELECT * FROM alertas WHERE id_usuario="+id_usuario;
+        //console.log(query);
+        return;
+        db.transaction(function(tx){
+            tx.executeSql(query,[],function(tx,result){
+                n = result.rows.length;
+                var alertas = new Array(n);
+                
+                for(i = 0; i< n; i++){
+                    
+                    item = result.rows.item(i);
+                    alertas[i] = new alerta(item.id,item.id_usuario,item.supervisor,item.mensaje,item.fecha,item.visto,item.sincronizado,item.servidor_id);
+                    
+                    //console.log(alertas[i]);
+                    
+                }
+                
+                callback(alertas);
+            });
+            
+            
+            
+        })
+    }   
+    
+    
+
+    
+    
+}
+
+
+/*********** CLASE CATEGORIAS ************/
+
+function categoria (id, id_usuario, nombre, descripcion, sincronizado, servidor_id) {
+    this.id = id;
+    this.id_usuario = id_usuario;
+    this.nombre = nombre;
+    this.descripcion = descripcion;
+    this.sincronizado = sincronizado;
+    this.servidor_id = servidor_id;
+
+    
+   
+    this.actualizar = function() {
+        
+        //El usuario solo esta permitido a modificar las variables visto y sincronizado
+        var query = "UPDATE alertas SET visto="+this.visto+", "+"sincronizado="+this.sincronizado+" WHERE id="+this.id;
+        //console.log(query);
+        return;
+        db.transaction(function(tx){
+            tx.executeSql(query);
+        })
+    };
+    
+    this.borrar = function() {
+        
+        
+        var query = "DELETE FROM alertas WHERE id="+this.id;
+        return;
+        //console.log(query);
+        db.transaction(function(tx){
+            tx.executeSql(query);
+        })
+    };
+    
+       
+}
+
+
+c = new Categorias();
+//c.crear(2,"Prueba2",'Esta es una categoria de prueba',0,null);
+/*
+c.listar(2,function(categorias){
+    console.log(categorias);
+});
+*/
+
+function Categorias(){
+
+    
+    this.crear = function(id_usuario, nombre, descripcion, sincronizado, servidor_id){
+        
+        var query = "INSERT INTO categorias(id_usuario, nombre, descripcion, sincronizado, servidor_id) VALUES("+id_usuario+",'"+nombre+"','"+descripcion+"',"+sincronizado+","+servidor_id+")";
+        
+        
+        //console.log(query);
+        
+        
+        db.transaction(function(tx){
+            tx.executeSql(query);
+            //console.log(query);
+        })
+    }
+    
+   
+   //Lista todas los sitios de un usuario
+    this.listar = function(id_usuario,callback){
+        
+        var query = "SELECT * FROM categorias WHERE id_usuario="+id_usuario;
+        //console.log(query);
+        
+        db.transaction(function(tx){
+            tx.executeSql(query,[],function(tx,result){
+                n = result.rows.length;
+                var categorias = new Array(n);
+                
+                for(i = 0; i< n; i++){
+                    
+                    item = result.rows.item(i);
+                    categorias[i] = new categoria(item.id, item.id_usuario, item.nombre, item.descripcion, item.sincronizado, item.servidor_id);
+                    
+                    //console.log(alertas[i]);
+                    
+                }
+                
+                callback(categorias);
+            });
+            
+            
+            
+        })
+    }
+   
+    
+}
