@@ -258,3 +258,102 @@ function crearSitio(latitud,longitud,fecha,usuario_id){
 
 
 }
+
+function listarSitios(){
+    
+    var usuario_id = sessionStorage.getItem('user-id');
+   
+
+    
+
+    categorias = new Categorias();
+    categorias.listar(usuario_id, listarCat);
+    
+    
+    function listarCat(categorias){
+       
+        var s = new Sitios();
+        
+        s.listarC(usuario_id, "is NULL", function(sitios){
+            if(sitios.length>0){
+                $('#lista-sitios').append('<div id="cat-null" data-role="collapsible"><h3>(Sin Categoría)</h3></div>');
+                
+                
+                $('#cat-null').append('<ul data-role="listview"></ul>');
+                
+                
+                for(j=0;j<sitios.length;j++){
+                    id_cat = "cat-null";
+                    
+                    stream = '<li><a href="#">\n';
+                    stream += '<img src="img/no-image.png" />\n';
+                    stream += '<h3>'+sitios[j].nombre+'</h3>\n';
+                    stream += '<p>'+sitios[j].descripcion+'</p>\n';
+                    stream += '</a></li>\n'
+                    
+                    $('#'+id_cat+' ul').append(stream);
+                    
+                    $('#'+id_cat+' ul').listview();
+                    $('#'+id_cat+' ul').listview("refresh");
+               
+                }
+                
+                $('#lista-sitios').collapsibleset( "refresh" );
+            }
+        })
+        
+
+        
+        for (i=0;i<categorias.length;i++){
+            
+            id_cat = "cat-"+categorias[i].id;
+            nombre_cat = categorias[i].nombre;
+            
+            
+            $('#lista-sitios').append('<div id="'+id_cat+'" data-role="collapsible"><h3>Categoria: '+nombre_cat+'</h3></div>');
+                     
+            $('#'+id_cat).append('<ul data-role="listview"></ul>');        
+                 
+        }
+        
+        
+        
+        for (i=0;i<categorias.length;i++){
+            s.listarC(usuario_id, "="+categorias[i].id, function(sitios){
+                for(j=0;j<sitios.length;j++){
+                    id_cat = "cat-"+sitios[j].id_categoria;
+                    
+                    stream = '<li><a href="#">\n';
+                    stream += '<img src="img/no-image.png" />\n';
+                    stream += '<h3>'+sitios[j].nombre+'</h3>\n';
+                    stream += '<p>'+sitios[j].descripcion+'</p>\n';
+                    stream += '</a></li>\n'
+                    
+                    $('#'+id_cat+' ul').append(stream);
+                    
+                    $('#'+id_cat+' ul').listview();
+                    $('#'+id_cat+' ul').listview("refresh");
+                    
+                    
+                    
+                }
+                
+            });
+        }
+        
+        
+        $('#lista-sitios').collapsibleset( "refresh" );
+        
+        
+    }
+    
+    $('#sitios .regresar').click(function(e){
+        e.stopImmediatePropagation();
+        $('#lista-sitios').html("");
+        
+    })
+    
+    
+    
+    
+}

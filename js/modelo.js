@@ -184,18 +184,17 @@ function Sitios(){
         db.transaction(function(tx){
             tx.executeSql(query,[],function(tx,result){
                 n = result.rows.length;
-                var alertas = new Array(n);
+                var sitios = new Array(n);
                 
                 for(i = 0; i< n; i++){
                     
                     item = result.rows.item(i);
-                    alertas[i] = new alerta(item.id,item.id_usuario,item.supervisor,item.mensaje,item.fecha,item.visto,item.sincronizado,item.servidor_id);
+                    sitios[i] = new sitio(item.id, item.id_usuario, item.latitud, item.longitud, item.fecha, item.nombre, item.descripcion, item.url_imagen, item.id_categoria, item.sincronizado, item.servidor_id);
                     
-                    //console.log(alertas[i]);
                     
                 }
                 
-                callback(alertas);
+                callback(sitios);
             });
             
             
@@ -203,26 +202,27 @@ function Sitios(){
         })
     }
     
+    //Lista todas los sitios de un usuario por categoria
      this.listarC = function(id_usuario, id_categoria, callback){
         
-        var query = "SELECT * FROM alertas WHERE id_usuario="+id_usuario;
+        var query = "SELECT * FROM sitios WHERE id_usuario="+id_usuario+" AND id_categoria "+id_categoria;
         //console.log(query);
-        return;
+        
         db.transaction(function(tx){
             tx.executeSql(query,[],function(tx,result){
                 n = result.rows.length;
-                var alertas = new Array(n);
+                var sitios = new Array(n);
                 
                 for(i = 0; i< n; i++){
                     
                     item = result.rows.item(i);
-                    alertas[i] = new alerta(item.id,item.id_usuario,item.supervisor,item.mensaje,item.fecha,item.visto,item.sincronizado,item.servidor_id);
+                    sitios[i] = new sitio(item.id, item.id_usuario, item.latitud, item.longitud, item.fecha, item.nombre, item.descripcion, item.url_imagen, item.id_categoria, item.sincronizado, item.servidor_id);
                     
-                    //console.log(alertas[i]);
+
                     
                 }
                 
-                callback(alertas);
+                callback(sitios);
             });
             
             

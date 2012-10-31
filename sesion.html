@@ -57,6 +57,14 @@ and open the template in the editor.
 
                     
                     });
+                    
+                    $('a[href="#sitios"]').click(function(e){
+                        
+                        e.stopImmediatePropagation();
+                        listarSitios();
+
+                    
+                    });
 
 
                 });
@@ -82,7 +90,7 @@ and open the template in the editor.
             <a href="#nuevo_sitio">Nuevo Sitio</a><br />
             <a data-ajax="false" href="map.html#mappage">Mapa</a><br />
             <a href="#">Hacer Check-in</a><br />
-            <a href="#">Sitios y Checkpoints</a><br />
+            <a href="#sitios">Sitios y Checkpoints</a><br />
             <a href="#" >Sincronizar</a><br />
             <a href="#alertas">Alertas</a><br />
 
@@ -186,6 +194,21 @@ and open the template in the editor.
         
         
     </div>
+    
+        <div data-role="page" id="sitios">
+            <div data-role="header">
+                <a href="#home" class="regresar" data-icon="back">Regresar</a>
+                <h1>Sitios y<br /> Checkpoints</h1>
+            </div>
+            
+            <div id="lista-sitios" data-role="collapsible-set">
+                
+            
+            </div>
+            
+        </div>
+        
+
        
     
    
