@@ -135,9 +135,18 @@ function sitio (id, id_usuario, latitud, longitud, fecha, nombre, descripcion, u
     this.actualizar = function() {
         
         //El usuario solo esta permitido a modificar las variables visto y sincronizado
-        var query = "UPDATE alertas SET visto="+this.visto+", "+"sincronizado="+this.sincronizado+" WHERE id="+this.id;
-        //console.log(query);
         
+        if(this.id_categoria==null){
+            id_categoria="null";
+        }
+        else{
+            id_categoria=this.id_categoria;
+        }
+        
+        
+        var query = "UPDATE sitios SET nombre='"+this.nombre+"', "+"descripcion='"+this.descripcion+"', "+"id_categoria="+id_categoria+" WHERE id="+this.id;
+        //console.log(query);
+
         db.transaction(function(tx){
             tx.executeSql(query);
         })
@@ -146,7 +155,7 @@ function sitio (id, id_usuario, latitud, longitud, fecha, nombre, descripcion, u
     this.borrar = function() {
         
         
-        var query = "DELETE FROM alertas WHERE id="+this.id;
+        var query = "DELETE FROM sitios WHERE id="+this.id;
         //console.log(query);
         db.transaction(function(tx){
             tx.executeSql(query);
@@ -228,7 +237,31 @@ function Sitios(){
             
             
         })
-    }   
+    }
+
+
+//Sitio unico por ID
+
+     this.consultar = function(id, callback){
+        
+        var query = "SELECT * FROM sitios WHERE id="+id;
+        //console.log(query);
+        
+        db.transaction(function(tx){
+            tx.executeSql(query,[],function(tx,result){
+                
+                
+                item = result.rows.item(0);
+                s = new sitio(item.id, item.id_usuario, item.latitud, item.longitud, item.fecha, item.nombre, item.descripcion, item.url_imagen, item.id_categoria, item.sincronizado, item.servidor_id);
+                
+                
+                callback(s);
+            
+            });
+      
+            
+        })
+    }
     
     
 
@@ -328,6 +361,28 @@ function Categorias(){
             
         })
     }
+    
+    
+     this.consultar = function(id, callback){
+        
+        var query = "SELECT * FROM categorias WHERE id="+id;
+        //console.log(query);
+        
+        db.transaction(function(tx){
+            tx.executeSql(query,[],function(tx,result){
+                
+                
+                item = result.rows.item(0);
+                c = new categoria(item.id, item.id_usuario, item.nombre, item.descripcion, item.sincronizado, item.servidor_id);
+                
+                
+                callback(c);
+            
+            });
+      
+            
+        })
+    }    
    
     
 }
