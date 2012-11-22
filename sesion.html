@@ -69,6 +69,23 @@ and open the template in the editor.
                     
                     });
 
+                    $('a[href="#checkpoints"]').click(function(e){
+                        
+                        e.stopImmediatePropagation();
+                        listarCheckpoints();
+
+                    
+                    });
+
+                    $('a[href="#check-in"]').click(function(e){
+                        
+                        e.stopImmediatePropagation();
+                        listarCheckins();
+                        return false;
+
+                    
+                    });
+
 
                 });
                 
@@ -79,31 +96,24 @@ and open the template in the editor.
     </head>
     <body>
     <div data-role="page" id="home">
-    <div data-role="header">
-	<a href="#" id="cerrar" data-icon="delete">Cerrar Sesión</a>
-	<h1></h1>
-	<a href="#" data-icon="check">Configuración</a>
-    </div>
     
-            
-            
-    <div data-role="content" style="padding: 15px">
-        
-        <div>
-            <a href="#nuevo_sitio">Nuevo Sitio</a><br />
-            <a data-ajax="false" href="map.html#mappage">Mapa</a><br />
-            <a href="#">Hacer Check-in</a><br />
-            <a href="#sitios">Sitios</a><br />
-            <a href="#">Checkpoints</a><br />
-            <a href="#" >Sincronizar</a><br />
-            <a href="#alertas">Alertas</a><br />
-
-            
+        <div data-role="header">
+            <a href="#" id="cerrar" data-icon="delete">Cerrar Sesión</a>
+            <h1></h1>
+            <a href="#" data-icon="check">Configuración</a>
         </div>
-        
-        
-    </div>
-        
+
+        <ul data-role="listview">
+            <li><a href="#nuevo_sitio">Nuevo Sitio</a></li>
+            <li><a data-ajax="false" href="map.html#mappage">Mapa</a>
+            <li><a href="#check-in">Hacer Check-in</a></li>
+            <li><a href="#sitios">Sitios</a></li>
+            <li><a href="#checkpoints">Checkpoints</a></li>
+            <li><a href="#" >Sincronizar</a></li>
+            <li><a href="#alertas">Alertas</a></li>
+
+        </ul> 
+   
     </div>
     
     <div data-role="page" id="alertas">
@@ -253,11 +263,81 @@ and open the template in the editor.
                 </div>
 
             </div>
-            
-            
+          
         </div>
 
-       
+        
+        <div data-role="page" id="checkpoints">
+            <div data-role="header">
+                <a href="#home" class="regresar" data-icon="back">Regresar</a>
+                <h1>Checkpoints</h1>
+            </div>
+            
+            <ul id="lista-checkpoints" data-role="listview">
+                
+            
+            </ul>
+            
+        </div>
+        
+        <div data-role="page" id="perfil-checkpoint">
+            
+            
+            
+            <div data-role="header">
+                <a href="#" class="regresar" data-icon="back">Regresar</a>
+                <h1>Perfil de<br /> Checkpoint</h1>
+            </div>
+            
+            
+            <dl title="Definition list">
+                    <dt>Nombre</dt>
+                    <dd id="checkpoint-nombre">I'm the definition text</dd>
+                    <dt>Latitud</dt>
+                    <dd id="checkpoint-latitud">I'm the definition text</dd>
+                    <dt>Longitud</dt>
+                    <dd id="checkpoint-longitud">I'm the definition text</dd>
+                    <dt>Fecha y hora de creación</dt>
+                    <dd id="checkpoint-fecha">I'm the definition text</dd>
+                    <dt>Descripción</dt>
+                    <dd id="checkpoint-descripcion">I'm the definition text</dd>
+                    <dt>Estado Actual</dt>
+                    <dd id="checkpoint-status">I'm the definition text</dd>
+                    <dt>Informacion para el usuario</dt>
+                    <dd id="checkpoint-info">I'm the definition text</dd>
+                    <dt>Imagen</dt>
+                    <dd id="checkpoint-imagen">I'm the definition text</dd>
+                    <dt>Mini-Mapa</dt>
+                    <dd id="checkpoint-mapa">I'm the definition text</dd>
+                    
+            </dl>
+            
+            <div data-role="footer" data-position="fixed" data-fullscreen="true" style="margin-top: 10px">
+
+                <div data-role="navbar"  data-iconpos="right">
+                    <ul>
+                        <li><a class="check-in" href="#" >Hacer Check-in</a></li>
+                        <li><a href="#" >Ver en Mapa</a></li>
+                        
+                    </ul>
+                </div>
+
+            </div>
+          
+        </div>
+        
+        <div data-role="page" id="check-in">
+            <div data-role="header">
+                <a href="#home" class="regresar" data-icon="back">Regresar</a>
+                <h1>Checkpoints<br/> Cercanos</h1>
+            </div>
+            
+            <ul id="lista-check-in" data-role="listview">
+                
+            
+            </ul>
+            
+        </div>
     
    
     </body>

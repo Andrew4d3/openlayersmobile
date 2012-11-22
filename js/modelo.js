@@ -386,3 +386,120 @@ function Categorias(){
    
     
 }
+
+/*********** CLASE CHECKPOINTS *************/
+
+function checkpoint (id, nombre, latitud, longitud, fecha, descripcion, info, supervisor, url_imagen, id_usuario, sincronizado, checked_in, servidor_id) {
+    this.id = id;
+    this.nombre = nombre;
+    this.latitud = latitud;
+    this.longitud = longitud;
+    this.fecha = fecha;
+    this.descripcion = descripcion;
+    this.info = info;
+    this.supervisor = supervisor;
+    this.url_imagen = url_imagen;
+    this.id_usuario = id_usuario;
+    this.sincronizado = sincronizado;
+    this.servidor_id = servidor_id;
+    this.checked_in = checked_in;
+    
+
+   
+    this.actualizar = function() {
+        //ejemplo: UPDATE checkpoints SET sincronizado=0, checked_in=1 WHERE id=1 
+        //El usuario solo esta permitido a modificar las variables visto y sincronizado
+        var query = "UPDATE checkpoints SET sincronizado="+this.sincronizado+", checked_in="+this.checked_in+" WHERE id="+this.id;
+        //console.log(query);
+        
+        db.transaction(function(tx){
+            tx.executeSql(query);
+        })
+    };
+    
+    //No esta planteado que el usuario borre checkpoints por lo que esta funcion solo es para pruebas
+    this.borrar = function() {
+
+        var query = "DELETE FROM checkpoints WHERE id="+this.id;
+        return;
+        //console.log(query);
+        db.transaction(function(tx){
+            tx.executeSql(query);
+        })
+    };
+    
+       
+}
+//ejemplo
+//c = new Checkpoints();
+//c.crear('checkpoint1',10.501568406879,-66.833776949663,'10/10/2012','Este es un checkpoint de prueba','Esta es informacion importante','Puyol','',2,1,0,2121);
+function Checkpoints(){
+    
+    //Este metodo es de prueba. El usuario no puede crear Checkpoints
+    this.crear = function(nombre, latitud, longitud, fecha, descripcion, info, supervisor, url_imagen, id_usuario, sincronizado, checked_in, servidor_id){
+        
+        var query = "INSERT INTO checkpoints(nombre, latitud, longitud, fecha, descripcion, info, supervisor, url_imagen, id_usuario, sincronizado, checked_in, servidor_id) VALUES('"+nombre+"',"+latitud+","+longitud+",'"+fecha+"','"+descripcion+"','"+info+"','"+supervisor+"','"+url_imagen+"',"+id_usuario+","+sincronizado+","+checked_in+","+servidor_id+")";
+        
+        
+        console.log(query);
+        return;
+        
+        db.transaction(function(tx){
+            tx.executeSql(query);
+            //console.log(query);
+        })
+    }
+    
+   
+   //Lista todas los checkpoints de un usuario
+    this.listar = function(id_usuario,callback){
+        
+        var query = "SELECT * FROM checkpoints WHERE id_usuario="+id_usuario;
+        //console.log(query);
+        
+        db.transaction(function(tx){
+            tx.executeSql(query,[],function(tx,result){
+                n = result.rows.length;
+                var checkpoints = new Array(n);
+                
+                for(i = 0; i< n; i++){
+                    
+                    item = result.rows.item(i);
+                    checkpoints[i] = new checkpoint(item.id, item.nombre, item.latitud, item.longitud, item.fecha, item.descripcion, item.info, item.supervisor, item.url_imagen, item.id_usuario, item.sincronizado, item.checked_in, item.servidor_id);
+                    
+                    //console.log(alertas[i]);
+                    
+                }
+                
+                callback(checkpoints);
+            });
+            
+            
+            
+        })
+    }
+    
+    
+     this.consultar = function(id, callback){
+        
+        var query = "SELECT * FROM checkpoints WHERE id="+id;
+        //console.log(query);
+        
+        db.transaction(function(tx){
+            tx.executeSql(query,[],function(tx,result){
+                
+                
+                item = result.rows.item(0);
+                c = new checkpoint(item.id, item.nombre, item.latitud, item.longitud, item.fecha, item.descripcion, item.info, item.supervisor, item.url_imagen, item.id_usuario, item.sincronizado, item.checked_in, item.servidor_id);
+                
+
+                callback(c);
+            
+            });
+      
+            
+        })
+    }    
+   
+    
+}
