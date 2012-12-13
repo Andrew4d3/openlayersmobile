@@ -8,7 +8,7 @@ var gg = new OpenLayers.Projection("EPSG:4326");
 var sm = new OpenLayers.Projection("EPSG:900913");
 
 var init = function (onSelectFeatureFunction) {
-
+    console.log("mapa cargado");
     var vector = new OpenLayers.Layer.Vector("Vector Layer", {});
 
     var sprintersLayer = new OpenLayers.Layer.Vector("Sprinters", {

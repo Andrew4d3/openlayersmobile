@@ -1,3 +1,39 @@
+
+//console.log('modelo5');
+
+
+if(localStorage.getItem('registros_prueba')!=1){
+
+    
+    
+    
+    
+    c = new Checkpoints();
+    
+    c.crear("Checkpoint 1",10.486688,-66.89476,"11/11/2012 12:00","Plaza La Langosta (Facultad de Ciencias)","","Supervisor1","",2,1,0,121);
+    c.crear("Checkpoint 2",10.48672,-66.895195,"11/11/2012 12:01","Cafetin (Facultad de Ciencias)","Compra un cachito aqui","Supervisor1","",2,1,0,122);
+    c.crear("Checkpoint 3",10.486767,-66.893698,"11/11/2012 12:02","Estacionamiento (Facultad de Ciencias)","","Supervisor1","",2,1,0,123);
+    c.crear("Checkpoint 4",10.4919,-66.890855,"11/11/2012 12:03","Plaza el rectorado (UCV)","","Supervisor1","",2,1,0,124);
+    c.crear("Checkpoint 5",10.491742,-66.890329,"11/11/2012 12:04","Tierra de Nadie (UCV)","","Supervisor1","",2,1,0,125);
+    
+    
+    a = new Alertas();
+    
+    a.crear(2, 'Supervisor1', 'Haz checkpoint en los lugares indicados', '11/11/2012', 0, 1, 121);
+    a.crear(2, 'Supervisor1', 'Ya se ha reiniciado la contraseña', '12/11/2012', 0, 1, 122);
+    
+    localStorage.setItem('registros_prueba', 1);
+    console.log("Se han creado checkpoints y alertas de prueba");
+    
+
+
+}
+
+
+
+
+
+
 /* // Codigo de Prueba
 
 a = new Alertas();
@@ -23,7 +59,6 @@ a.crear(2, "Valdes", "Hoy la cague en la porteria", "02/12/2012", 0, 1,233);
 a.crear(2, "Messi", "Hoy me volvi a llevar la pelota", "03/12/2012", 0, 1,234);
 a.crear(2, "Alba", "Hoy meti un golazo normal y un autogolazo de leyenda", "04/12/2012", 0, 1,235);
 */
-
 
 /** CLASE DE alertas **/
 
@@ -431,8 +466,12 @@ function checkpoint (id, nombre, latitud, longitud, fecha, descripcion, info, su
        
 }
 //ejemplo
+
+
 //c = new Checkpoints();
-//c.crear('checkpoint1',10.501568406879,-66.833776949663,'10/10/2012','Este es un checkpoint de prueba','Esta es informacion importante','Puyol','',2,1,0,2121);
+
+//c.crear("Checkpoint 1",10.486688,-66.89476,"11/11/2012 12:00","Plaza La Langosta (Facultad de Ciencias)","","Supervisor1","",2,1,0,121);
+//c.crear("Checkpoint 3",10.486767,-66.893698,"11/11/2012 12:02","Estacionamiento (Facultad de Ciencias)","","Supervisor1","",2,1,0,12);
 function Checkpoints(){
     
     //Este metodo es de prueba. El usuario no puede crear Checkpoints
@@ -441,8 +480,8 @@ function Checkpoints(){
         var query = "INSERT INTO checkpoints(nombre, latitud, longitud, fecha, descripcion, info, supervisor, url_imagen, id_usuario, sincronizado, checked_in, servidor_id) VALUES('"+nombre+"',"+latitud+","+longitud+",'"+fecha+"','"+descripcion+"','"+info+"','"+supervisor+"','"+url_imagen+"',"+id_usuario+","+sincronizado+","+checked_in+","+servidor_id+")";
         
         
-        console.log(query);
-        return;
+        //console.log(query);
+        
         
         db.transaction(function(tx){
             tx.executeSql(query);

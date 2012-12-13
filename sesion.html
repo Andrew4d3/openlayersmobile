@@ -23,68 +23,54 @@ and open the template in the editor.
             }
         </style>
         <script>
-            
             document.addEventListener("deviceready", onDeviceReady, false);
-            
+           
             function onDeviceReady(){
                 init_db();
                 if(sessionStorage.getItem('user')===""){
                     location.href="index.html";
+                    //$.mobile.changePage('index.html');
                 }
 
-
                 $(document).ready(function(){
+                    
+                    document.addEventListener("backbutton", function(e){
+                        if($.mobile.activePage.is('#home')){
+                            e.preventDefault();
+                            navigator.app.exitApp();
+                        }
+                        else {
+                            $.mobile.changePage($('#home'));
+                        }
+                    }, false);
+
+                        
 
                     user=sessionStorage.getItem('user');
-
-                    $("#cerrar").click(function(){
+                 
+                    
+                    $('#nuevo_sitio').live('pagebeforeshow',nuevoSitio);
+                    
+                    $('#check-in').live('pagebeforeshow',listarCheckins);
+                    
+                    $('#sitios').live('pagebeforeshow',listarSitios);
+                    
+                     $('#checkpoints').live('pagebeforeshow',listarCheckpoints);
+                     
+                     $('#alertas').live('pagebeforeshow',listarAlertas);
+                     
+                     
+                    $("#cerrar").click(function(e){
+                        e.stopImmediatePropagation();
 
                         localStorage.setItem('auto',"false");
                         sessionStorage.setItem('user',"");
-
                         location.href="index.html";
-                    });
-                    
-                    
-                    $('a[href="#alertas"]').click(function(){
-                        lista = new Alertas();
-                       
-                        lista.listar(sessionStorage.getItem('user-id'),ordenarAlertas);
-                    
-                    });
-                    
-                    $('a[href="#nuevo_sitio"]').click(function(e){
+                        //$.mobile.changePage('index.html');
                         
-                        e.stopImmediatePropagation();
-                        nuevoSitio();
-
-                    
                     });
                     
-                    $('a[href="#sitios"]').click(function(e){
-                        
-                        e.stopImmediatePropagation();
-                        listarSitios();
-
-                    
-                    });
-
-                    $('a[href="#checkpoints"]').click(function(e){
-                        
-                        e.stopImmediatePropagation();
-                        listarCheckpoints();
-
-                    
-                    });
-
-                    $('a[href="#check-in"]').click(function(e){
-                        
-                        e.stopImmediatePropagation();
-                        listarCheckins();
-                        return false;
-
-                    
-                    });
+                   
 
 
                 });
@@ -95,8 +81,9 @@ and open the template in the editor.
         </script>
     </head>
     <body>
+        
     <div data-role="page" id="home">
-    
+
         <div data-role="header">
             <a href="#" id="cerrar" data-icon="delete">Cerrar Sesión</a>
             <h1></h1>
@@ -177,7 +164,7 @@ and open the template in the editor.
         
         <form id="sitio_form" style="margin-top: 10px">
             <div data-role="fieldcontain">
-                <label for="basic">Nombre:</label><input required type="text" maxlength="20" name="nombre" id="nombre" data-mini="true" placeholder="Campo requerido" title="El sitio a crear tiene que tener un nombre que lo identifique"/>
+                <label for="basic">Nombre:</label><input  type="text" maxlength="20" name="nombre" id="nombre" data-mini="true" placeholder="Campo requerido" title="El sitio a crear tiene que tener un nombre que lo identifique"/>
                 <label for="basic">Descripcion:</label><input type="text" maxlength="600" name="descripcion" id="descripcion" data-mini="true" placeholder="Campo opcional"/>
             
                 <label for="opciones-categorias" class="select">Categoria:</label>
@@ -199,7 +186,7 @@ and open the template in the editor.
             </div>
             <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
             <form style="margin:10px">
-                <label for="basic">Nombre de categoría:</label><input required type="text" name="nombre" id="nombre_cat" data-mini="true" placeholder="Requerido" title="Un nombre para la categoría es requerido" maxlength="20"/>
+                <label for="basic">Nombre de categoría:</label><input  type="text" name="nombre" id="nombre_cat" data-mini="true" placeholder="Requerido" title="Un nombre para la categoría es requerido" maxlength="20"/>
                 <label for="basic">Descripción de categoría:</label><input type="text" name="descripcion_cat" id="descripcion_cat" data-mini="true" placeholder="Opcional" maxlength="100"/>
                 <input type="submit" value="Crear Categoria">
             </form>
@@ -269,7 +256,7 @@ and open the template in the editor.
         
         <div data-role="page" id="checkpoints">
             <div data-role="header">
-                <a href="#home" class="regresar" data-icon="back">Regresar</a>
+                <a href="#home" class="regresar" data-icon="back" >Regresar</a>
                 <h1>Checkpoints</h1>
             </div>
             

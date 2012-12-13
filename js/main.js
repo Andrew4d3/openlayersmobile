@@ -33,7 +33,12 @@ function init_db(){
     }
     else{
        // console.log("Tablas ya creadas");
-    } 
+    }
+    
+
+    
+    
+    
 }
 
 
@@ -47,22 +52,26 @@ function autentica_usuario(user, pass, auto){
     var callback = function(tx,results){
         //Si no hay columnas significa que el usuario o contraseña es incorrecto
         len =results.rows.length;
-        user_id = results.rows.item(0).id;
+        
         
         if(len==0){
             alert("Usuaro o Contraseña Incorrecta");
         }
         else{
             alert("Bienvenido "+user);
+            user_id = results.rows.item(0).id;
             
             if(auto){
+                
                 localStorage.setItem('auto',true);
                 localStorage.setItem('auto-user',user);
                 localStorage.setItem('auto-user-id',user_id);
+                
             }
             
             sessionStorage.setItem('user',user);
             sessionStorage.setItem('user-id',user_id);
+            //$.mobile.changePage('sesion.html');
             location.href="sesion.html";
         }
        
@@ -96,7 +105,7 @@ function crear_usuario(user,pass){
             db.transaction(function(tx){
                 tx.executeSql(query);
                  alert("Usuario Creado con Exito");
-                 location.href="index.html";
+                 $.mobile.changePage($('#login'));
             });
            
         }

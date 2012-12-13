@@ -1,75 +1,90 @@
 //Controlador que organiza y maneja los eventos de la lista de alertas
-var ordenarAlertas = function (alertas){
-    
-    //Numero total de alertas, se decrementara a medida que se eliminen
-    var total_alertas = alertas.length;
-    //Empezamos a crear el HTML que mostrara las alertas
-    stream ="<h3>Tienes <span id='total-alertas'>"+total_alertas+"</span> alerta(s)</h3>\n";
 
-    //console.log(stream);
-    
-    //Iteramos sobre el arreglo de alertas que viene del modelo
-    for(i=alertas.length-1; i>=0; i--){
-        item = alertas[i];
-        stream += '<div class="alerta" id="alerta-'+i+'" data-role="collapsible" >\n';
-        stream += '<h3>Enviado por: '+item.supervisor+' el '+item.fecha+'</h3>\n';
-        stream += '<p>'+item.mensaje+'</p>\n';
-        stream += '<a class="borra" href="#alerta-'+i+'" data-role="button" data-icon="delete" data-mini="true" data-inline="true">Borrar Alerta</a>';
-        stream += '</div>\n';
-        console.log(stream);
-    }
+function listarAlertas(){
 
-    //Lo integramos con el HTML
-    $('#lista-alertas').html(stream);
-    //Reiniciamos los formatos de jquery mobile
-    $( "#lista-alertas" ).collapsibleset( "refresh" );
-    $('.alerta a').button();
+    lista = new Alertas();
+                       
+    lista.listar(sessionStorage.getItem('user-id'),ordenarAlertas);
 
-    //Manejamos el evento "expandir" que indica que una alerta ya fue vista por el usuario
-    $('.alerta').bind('expand',function(e){
-        posicion = $(this).attr("id").split("-")[1];
+    function ordenarAlertas(alertas){
 
-        if(alertas[posicion].visto==1){
-            return;
-        }
-        else{
+        //Numero total de alertas, se decrementara a medida que se eliminen
+        var total_alertas = alertas.length;
+        //Empezamos a crear el HTML que mostrara las alertas
+        stream ="<h3>Tienes <span id='total-alertas'>"+total_alertas+"</span> alerta(s)</h3>\n";
 
-            alertas[posicion].visto=1;
-            alertas[posicion].actualizar();
-            //console.log("actualizado");
-            return;
+        //console.log(stream);
+
+        //Iteramos sobre el arreglo de alertas que viene del modelo
+        for(i=alertas.length-1; i>=0; i--){
+            item = alertas[i];
+            stream += '<div class="alerta" id="alerta-'+i+'" data-role="collapsible" >\n';
+            stream += '<h3>Enviado por: '+item.supervisor+' el '+item.fecha+'</h3>\n';
+            stream += '<p>'+item.mensaje+'</p>\n';
+            stream += '<a class="borra" href="#alerta-'+i+'" data-role="button" data-icon="delete" data-mini="true" data-inline="true">Borrar Alerta</a>';
+            stream += '</div>\n';
+            //console.log(stream);
         }
 
+        //Lo integramos con el HTML
+        $('#lista-alertas').html(stream);
+        //Reiniciamos los formatos de jquery mobile
+        $( "#lista-alertas" ).collapsibleset( "refresh" );
+        $('.alerta a').button();
 
-    });
+        //Manejamos el evento "expandir" que indica que una alerta ya fue vista por el usuario
+        $('.alerta').bind('expand',function(e){
+            posicion = $(this).attr("id").split("-")[1];
 
-    //Manejamos el evento del boton "borrar alerta" que borra el registo de la alerta determinada
-    $('.borra').click(function(){
-       
-        nodo = $(this).attr('href');
-        posicion = nodo.split("-")[1];
+            if(alertas[posicion].visto==1){
+                return;
+            }
+            else{
+
+                alertas[posicion].visto=1;
+                alertas[posicion].actualizar();
+                //console.log("actualizado");
+                return;
+            }
 
 
-        alertas[posicion].borrar();
-
-        //Aqui decrementamos el numero de alertas totales en 1 y lo indicamos en el mensaje que esta en la parte superior
-        total_alertas--;
-        $('#total-alertas').html(total_alertas);
-        
-        //Aqui retiramos el contenedor de la alerta del HTML (la vista)
-        console.log("borrado");
-        $($(this).attr('href')).fadeOut(function(){
-            $($(this).attr('href')).remove();
         });
-    });
+
+        //Manejamos el evento del boton "borrar alerta" que borra el registo de la alerta determinada
+        $('.borra').click(function(){
+
+            nodo = $(this).attr('href');
+            posicion = nodo.split("-")[1];
+
+
+            alertas[posicion].borrar();
+
+            //Aqui decrementamos el numero de alertas totales en 1 y lo indicamos en el mensaje que esta en la parte superior
+            total_alertas--;
+            $('#total-alertas').html(total_alertas);
+
+            //Aqui retiramos el contenedor de la alerta del HTML (la vista)
+            //console.log("borrado");
+            $($(this).attr('href')).fadeOut(function(){
+                $($(this).attr('href')).remove();
+            });
+        });
 
 
 
+    }
 }
 
 // Funcion que obtiene las coordenadas de longitud y latitud de la aplicacion movil asi como la fecha
 
 function nuevoSitio(){
+    
+    var intentos_g = 1;
+    
+    //Se desactivan los eventos pertinentes para evitar problemas de propagacion y no consistencia de datos
+    $('#nuevo_sitio .continuar').unbind('click');
+    $('#nuevo_sitio .actualizar').unbind('click');
+    $('#nuevo_sitio .regresar').unbind('click');
      
      //Ocultamos el footer para que no se pueda realizar ninguna opcion en sus botones mientras no se encuentren los datos requeridos
     $('#nuevo_sitio div[data-role="footer"]').hide();
@@ -77,11 +92,29 @@ function nuevoSitio(){
     //Esta funcion callback se ejecutara si la aplicacion movil pudo obtener los datos de geolocalizacion (latitud, longitud, etc...)
     var onSuccess = function(position) {
         //Se le notifica al usuario que los datos fueron obtenidos con exito
+        
+        if(intentos_g < 10 && position.coords.accuracy > 350){
+            //console.log("Poca presicion en intento "+intentos_g);
+            intentos_g++;
+            navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 0, timeout: 5000, enableHighAccuracy: true})
+            return;
+            
+        }
+        else if(intentos_g==10){
+            stream = "<p style='color:red;'>No se ha podido obtener una ubicación precisa. Busque una ubicación (preferiblemente con vista al cielo) y active el GPS y/o Wifi de su dispositivo<br />\n";
+            stream +="Precision:"+position.coords.accuracy+" metros</p>"
+            $('#datos-coordenadas').html(stream);
+            return;
+        }
+        
+        
+        
         alert("Posicion obtenida con exito");
         //Se guardan los datos en variables globales de alcance dentro de la funcion
         var latitud = position.coords.latitude;
         var longitud = position.coords.longitude;
         var presicion = position.coords.accuracy;
+        console.log(new Date(position.timestamp));
         var o_fecha = new Date(position.timestamp );
         var fecha = formatearFecha(o_fecha); //Formateamos la fecha y hora en el formato deseado
 
@@ -104,12 +137,9 @@ function nuevoSitio(){
         
         //Se crea el evento de "Continuar" el cual translada al usuario al formulario de creacion de sitio
         $('#nuevo_sitio .continuar').click(function(e){
-            //Se desactuvan los eventos pertinentes para evitar problemas de propagacion y no consistencia de datos
-            $('#nuevo_sitio .continuar').unbind('click');
-            $('#nuevo_sitio .actualizar').unbind('click');
-            $('#nuevo_sitio .regresar').unbind('click');
+
             //Se llama a la funcion que administrara la creacion del Sitio en la BD local
-            crearSitio(latitud, longitud, fecha,sessionStorage.getItem('user-id'),ordenarAlertas);
+            crearSitio(latitud, longitud, fecha,sessionStorage.getItem('user-id'));
         });
 
     }
@@ -130,15 +160,11 @@ function nuevoSitio(){
     }
     //Aqui se hace la llamada para obtner los datos de geolocalizacion, se le pasa como argumenta las funciones callback de exito y fallo explicadas anteriormente.
     //Esta accion es la que se ejecuta despues de ocultar el footer
-    navigator.geolocation.getCurrentPosition(onSuccess, onError)
+    navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 10, timeout: 5000, enableHighAccuracy: true})
 
     //Si se da al boton regresar, se regresa a la pantalla de inicio y se ejecuta esta funcion
     $('#nuevo_sitio .regresar').click(function(){
         
-        //se desactiva los eventos necesarios para evitar propagacion y falta de consistencia de datos
-        $('#nuevo_sitio .continuar').unbind('click');
-        $('#nuevo_sitio .actualizar').unbind('click');
-        $('#nuevo_sitio .regresar').unbind('click');
         
         //Se limpia el HTML
         $('#datos-coordenadas').html("");
@@ -151,7 +177,7 @@ function nuevoSitio(){
         //Se desactuva el evento de continuar, ya que este sera iniciado nuevamente en la funcion de exito de la llamada a geolocalizacion, y asi se evita la propagacion innecesaria
         $('#nuevo_sitio .continuar').unbind('click');
         //Se hace la misma llamada de geolocalizacion con sus respectivas funciones callback de fallo y exito
-        navigator.geolocation.getCurrentPosition(onSuccess, onError);
+        navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 10, timeout: 5000, enableHighAccuracy: true});
 
     });
                     
@@ -162,6 +188,10 @@ function nuevoSitio(){
 
 //Funcion que se ejecutara cuando el usuario este en la pantalla del formulario de crear sitio. La cual recibe los datos de geolocalizacion que el usuario confirmo en la pantalla anterior
 function crearSitio(latitud,longitud,fecha,usuario_id){
+    
+    //Desacactivamos los eventos necesarios para evitar la propagacion e inconsistencia de datos
+    $('#sitio_form').unbind('submit');
+    $('#crear_sitio .regresar').unbind('click');
     
     //Se inicializa el objeto que manipula la creacion y enlistado de categorias en el formulario
     var categorias = new Categorias();
@@ -212,7 +242,13 @@ function crearSitio(latitud,longitud,fecha,usuario_id){
     //Esta accion se ejecuta al hacer submit en el formulario de creacion de categorias (popup)
     $('#nueva_categoria form').submit(function(e){
         e.stopImmediatePropagation(); //evitamos propagacion
-        //Guardamos los datos del formulario en variables. No es necesario validar su existencia o tamaña, ya que el codigo html se encarga de ello (atributos required y maxlength)
+        //Guardamos los datos del formulario en variables.
+
+        if(!categoriaValida()){               
+            return false;
+        }
+
+
         nombre=$('#nombre_cat').val();
         descripcion=$('#descripcion_cat').val();
         //Creamos la categoria en la Base de datos. La variable de sincronizado esta en 0 (de falso) y la de servidor_id en null ya que todavia no se ha sincronizado con el servidor
@@ -227,12 +263,15 @@ function crearSitio(latitud,longitud,fecha,usuario_id){
     
     //Este evento se ejecuta al hacer submit al formulario principal de creacion de sitio
     $('#sitio_form').submit(function(){
+  
         
-        //Desacactivamos los eventos necesarios para evitar la propagacion e inconsistencia de datos
-        $('#sitio_form').unbind('submit');
-        $('#crear_sitio .regresar').unbind('click');
+        if(!sitioValido()){
+            return false;
+        }
+        
+        
         // Guardamos las entradas en el formulario para ser enviadas como atributos al modelo. 
-        // No es necesario validar su existencia o tamaña, ya que el codigo html se encarga de ello (atributos required y maxlength)
+ 
         nombre=$('#nombre').val();
         $('#nombre').val('');
         descripcion=$('#descripcion').val();
@@ -255,8 +294,8 @@ function crearSitio(latitud,longitud,fecha,usuario_id){
     //Este evento se ejecuta al darle al boton "Cancelar" dentro del formulario de creacion de sitios
     $('#crear_sitio .regresar').click(function(){
         //Desacactivamos los eventos necesarios para evitar la propagacion e inconsistencia de datos
-        $('#sitio_form').unbind('submit');
-        $('#crear_sitio .regresar').unbind('click');
+        //$('#sitio_form').unbind('submit');
+        //$('#crear_sitio .regresar').unbind('click');
     });
 
 
@@ -265,6 +304,8 @@ function crearSitio(latitud,longitud,fecha,usuario_id){
 
 //Funcion que lista los sitios organizados por categorias
 function listarSitios(){
+    
+    $('#lista-sitios').html("");//Se reinicia el HTML de los sitios
     //Obtenemos el id del usuario en sesion
     var usuario_id = sessionStorage.getItem('user-id');
     //Instaciamos un objeto categorias que listara la categorias en la pagina
@@ -357,7 +398,7 @@ function listarSitios(){
     //Evento para regresar a la pantalla inicial (home)
     $('#sitios .regresar').click(function(e){
         e.stopImmediatePropagation();//Se evita la propagacion
-        $('#lista-sitios').html("");//Se reinicia el HTML de los sitios
+        
         
     });
 
@@ -387,6 +428,10 @@ function listarSitios(){
 
 //Esta es la funcion (callback) que carga el sitio en la pantalla "perfil-sitio". Recibe el objeto del sitio a cargar y realiza varias operacion con el DOM de esta pantalla
 function cargarSitio(sitio){
+    
+    
+    $('#perfil-sitio .borrar').unbind('click');
+    $('#perfil-sitio .editar').unbind('click');
     //Cargamos los distintos datos del objeto en los contenedores del html
     $('#sitio-nombre').html(sitio.nombre);
     $('#sitio-latitud').html(sitio.latitud);
@@ -431,9 +476,8 @@ function cargarSitio(sitio){
         //Evitamos propagacion y evitamos el comportamiento por defento del boton
         e.stopImmediatePropagation();
         e.preventDefault();
-        //Desactivamos los eventos de los botones de borrar y editar para que se evite su propagacion
-        $('#perfil-sitio .borrar').unbind('click');
-        $('#perfil-sitio .editar').unbind('click');        
+
+       
         //Obtenemos la pagina a regresar la cual se encuentra en la respectiva variable de sesion
         back_page = "#"+sessionStorage.getItem('back_perfil-sitio');
         //Cambiamos a esa pagina
@@ -441,7 +485,7 @@ function cargarSitio(sitio){
         //Reiniciamos el HTML de listar sitios y llamamos a la funcion que los cargara de nuevo.
         //Esto se hace debido a que el sitio pudo ser modificado y es necesario que esos datos sean reflejados en la pantalla de lista de sitios
         $('#lista-sitios').html("");
-        listarSitios();
+        //listarSitios();
     
     });
     
@@ -455,15 +499,12 @@ function cargarSitio(sitio){
         if(borrar){
             //...llamamos al metodo de borrar del sitio en cuestion
             sitio.borrar();      
-            //Desactivamos los eventos de borrar y editar para evitar propagaciones
-            $('#perfil-sitio .borrar').unbind('click');
-            $('#perfil-sitio .editar').unbind('click');
+
+
             //Obtenemos la pagina a regresar la cual se encuentra en la respectiva variable de sesion y cambiamos a esa pagina
             back_page = "#"+sessionStorage.getItem('back_perfil-sitio');
             $.mobile.changePage($(back_page));
-            //aqui lo mismo que en el evento anterior (El de regresar)
-            $('#lista-sitios').html("");
-            listarSitios();
+            
      
         }
      
@@ -471,9 +512,8 @@ function cargarSitio(sitio){
     
     //El evento que se disparara al darle al boton de editar
      $('#perfil-sitio .editar').click(function(e){
-         //Desactivamos los eventos de borrar y editar para evitar propagaciones
-        $('#perfil-sitio .borrar').unbind('click');
-        $('#perfil-sitio .editar').unbind('click');
+
+
         //Se creara una variable de sesion que albergara la direccion de la pagina actual "perfil-sitio". Para que desde la pantalla de crear_sitio se puede regresar a la actual.
         //Esto debido a que se reutilizara la pantalla de crear-sitio (aunqu con otra funcion tratante) para editar el sitio en cuestion
         sessionStorage.setItem('back_crear-sitio',"perfil-sitio");
@@ -493,6 +533,11 @@ function cargarSitio(sitio){
 
 //Funcion que se ejecutara cuando se de al boton de modificar sitio en la pantalla de perfil de sitio. Se reutilizara la pantalla de crear sitio
 function editarSitio(sitio){
+    
+    //Desacactivamos los eventos necesarios para evitar la propagacion e inconsistencia de datos
+    $('#sitio_form').unbind('submit');
+    $('#crear_sitio .regresar').unbind('click');
+    
     
     //Se inicializa el objeto que manipula la creacion y enlistado de categorias en el formulario
     var categorias = new Categorias();
@@ -579,11 +624,14 @@ function editarSitio(sitio){
     //Este evento se ejecuta al hacer submit al formulario principal de edicion de sitio
     $('#sitio_form').submit(function(){
         
-        //Desacactivamos los eventos necesarios para evitar la propagacion e inconsistencia de datos
-        $('#sitio_form').unbind('submit');
-        $('#crear_sitio .regresar').unbind('click');
+        
         // Asignamos las entradas al formulario a los atributos del objeto sitio
-        // No es necesario validar su existencia o tamaño, ya que el codigo html se encarga de ello (atributos required y maxlength)
+        
+        if(!sitioValido()) {
+            return false;
+        }
+        
+        
         sitio.nombre=$('#nombre').val();
         $('#nombre').val('');//Reiniciamos los valores de los formularios
         sitio.descripcion=$('#descripcion').val();
@@ -616,8 +664,7 @@ function editarSitio(sitio){
     $('#crear_sitio .regresar').click(function(){
         
         //Desacactivamos los eventos necesarios para evitar la propagacion e inconsistencia de datos
-        $('#sitio_form').unbind('submit');
-        $('#crear_sitio .regresar').unbind('click');
+
         
         $.mobile.changePage($('#perfil-sitio'));
         //Llamamos a la funcion cargar sitio que volvera a activar los eventos necesarios de esa pantalla
@@ -634,6 +681,7 @@ function editarSitio(sitio){
 //Funcion para cargar la lista de Checkpoints en la pantalla de Checkpoints
 function listarCheckpoints(){
     //Inicialisamos la clase
+    $('#lista-checkpoints').html("");//Se reinicia el HTML de la lista de checkpoints
     c = new Checkpoints();
     //Obtenemos el Id de usuario
     id_usuario = sessionStorage.getItem('user-id');
@@ -657,16 +705,15 @@ function listarCheckpoints(){
             }
             
         }
-        else{
-            //Si no hay checkpoints lo escribimos en el HTML del documento
-            $('#lista-checkpoints').html("No hay checkpoints disponibles");
-        }
+
     });
     
     //Evento al presionar el boton de regresar
      $('#checkpoints .regresar').click(function(e){
+        
         e.stopImmediatePropagation();//Se evita la propagacion
-        $('#lista-checkpoints').html("");//Se reinicia el HTML de la lista de checkpoints
+        
+        
         
     });
     
@@ -694,7 +741,8 @@ function listarCheckpoints(){
 //Funcion que carga el checkpoint en la pantalla de perfil de checkpoint
 function cargarCheckpoint(checkpoint){
     
-    
+    //Desactivamos los eventos del boton checking para evitar propagacion y problemas de consistencia de datos
+    $('#perfil-checkpoint .check-in').unbind('click');    
     //Cargamos los distintos datos del objeto en los contenedores del html
     $('#checkpoint-nombre').html(checkpoint.nombre);
     $('#checkpoint-latitud').html(checkpoint.latitud);
@@ -746,9 +794,7 @@ function cargarCheckpoint(checkpoint){
         //Evitamos propagacion y evitamos el comportamiento por defento del boton
         e.stopImmediatePropagation();
         e.preventDefault();
-        //Desactivamos los eventos de los botones de borrar y editar para que se evite su propagacion
-      
-        $('#perfil-checkpoint .check-in').unbind('click');
+        
         //Obtenemos la pagina a regresar la cual se encuentra en la respectiva variable de sesion
         back_page = "#"+sessionStorage.getItem('back_perfil-checkpoint');
         //Cambiamos a esa pagina
@@ -822,7 +868,7 @@ function cargarCheckpoint(checkpoint){
             if(confirm("¿Desea registrar este Checkpoint?")){
                 //En caso de continuar. Se le solicita la ubicacion al SO del dispositivo. Esta ubicacion sera utilizada en la funcion callback "ubicacion" explicada atras
                 //La funcion fallo se ejecutara en caso de que no se haya podido obtener la ubicacion del SO. Esta tambien fue explicada atras.
-                navigator.geolocation.getCurrentPosition(ubicacion, fallo);
+                navigator.geolocation.getCurrentPosition(ubicacion, fallo, {maximumAge: 10000, timeout: 5000, enableHighAccuracy: true});
             }
             
         }
@@ -840,9 +886,25 @@ function cargarCheckpoint(checkpoint){
 
 //Funcion que lista los puntos para hacer checkin. Que no son mas que los checkpoints cercanos a la posicion del usuario
 function listarCheckins(){
-
+    
+    var intentos_g = 1;
+    $('#lista-check-in').html("");//Se reinicia el HTML de los checkins
    //Funcion que se realizara si se llego a obtener la ubicacion a traves del API del SO del dispositivo
    function ubicacion(position){
+       
+        if(intentos_g < 10 && position.coords.accuracy > 350){
+            //console.log("Poca presicion en intento "+intentos_g);
+            intentos_g++;
+            navigator.geolocation.getCurrentPosition(ubicacion, fallo, {maximumAge: 0, timeout: 5000, enableHighAccuracy: true})
+            return;
+            
+        }
+        else if(intentos_g==10){
+            alert("No se ha podido obtener una ubicación precisa. Busque una ubicación (preferiblemente con vista al cielo) y active el GPS y/o Wifi de su dispositivo");
+            
+            return;
+        }
+       
        
         alert("Ubicacion obtenida con exito");
         //Se cambia a la pagina donde se listaran los checkpoints cercanos
@@ -898,12 +960,12 @@ function listarCheckins(){
 
     //AQUI INICIA LA ITERACION DE LA FUNCION.
     //Se le solicita la ubicacion al dispositivo pasandole las funciones callback para exito (ubicacion) o error (fallo)
-   navigator.geolocation.getCurrentPosition(ubicacion, fallo);
+   navigator.geolocation.getCurrentPosition(ubicacion, fallo, {maximumAge: 0, timeout: 5000, enableHighAccuracy: true});
    
    //Evento que se ejecuta al presionar el boton regresar
     $('#check-in .regresar').click(function(e){
         e.stopImmediatePropagation();//Se evita la propagacion
-        $('#lista-check-in').html("");//Se reinicia el HTML de los sitios
+        
 
     });
     
@@ -962,4 +1024,32 @@ function esta_cerca(lat1,lon1,lat2,lon2){
     }
 
 
+}
+
+function categoriaValida(){
+    
+    if($('#nombre_cat').val()==""){
+        alert("Es necesario indicar un nombre para la categoría");
+        
+        return false;
+    }
+    else{
+        return true;
+    }
+ 
+    
+}
+
+function sitioValido(){
+    
+    if($('#nombre').val()==""){
+        alert("Es necesario indicar un nombre para el sitio");
+        
+        return false;
+    }
+    else{
+        return true;
+    }
+ 
+    
 }

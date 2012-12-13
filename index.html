@@ -18,17 +18,39 @@ and open the template in the editor.
             
             document.addEventListener("deviceready", onDeviceReady, false);
             
+            
+            
             function onDeviceReady() {
                 console.log("Dispositivo Listo!");
                 init_db();
                 $(document).ready(function(){
+                    
+                    
+                    document.addEventListener("backbutton", function(e){
+                        if($.mobile.activePage.is('#login')){
+                            e.preventDefault();
+                            navigator.app.exitApp();
+                        }
+                        else {
+                            $.mobile.changePage($('#login'));
+                        }
+                    }, false);
+                    
+                    
                 
                     if(localStorage.getItem('auto')=="true"){
-
+                        
                         sessionStorage.setItem('user',localStorage.getItem('auto-user'));
                         sessionStorage.setItem('user-id',localStorage.getItem('auto-user-id'));
+                        //$.mobile.changePage('sesion.html');
                         location.href="sesion.html";
                     }
+                    else{
+                        $.mobile.changePage($('#login'));
+                    }
+                    
+
+                    
 
                     $("#sesion").submit(function(e){
                         e.stopImmediatePropagation();
@@ -87,6 +109,14 @@ and open the template in the editor.
     </head>
     <body>
 <!-- Home -->
+<div data-role="page" id="blank">
+    
+    
+</div>
+
+
+
+
 <div data-role="page" id="login">
    <div data-theme="a" data-role="header">
       <h3>
