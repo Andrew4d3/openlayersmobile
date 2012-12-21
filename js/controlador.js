@@ -160,7 +160,7 @@ function nuevoSitio(){
     }
     //Aqui se hace la llamada para obtner los datos de geolocalizacion, se le pasa como argumenta las funciones callback de exito y fallo explicadas anteriormente.
     //Esta accion es la que se ejecuta despues de ocultar el footer
-    navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 10, timeout: 5000, enableHighAccuracy: true})
+    navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 0, timeout: 5000, enableHighAccuracy: true})
 
     //Si se da al boton regresar, se regresa a la pantalla de inicio y se ejecuta esta funcion
     $('#nuevo_sitio .regresar').click(function(){
@@ -177,7 +177,7 @@ function nuevoSitio(){
         //Se desactuva el evento de continuar, ya que este sera iniciado nuevamente en la funcion de exito de la llamada a geolocalizacion, y asi se evita la propagacion innecesaria
         $('#nuevo_sitio .continuar').unbind('click');
         //Se hace la misma llamada de geolocalizacion con sus respectivas funciones callback de fallo y exito
-        navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 10, timeout: 5000, enableHighAccuracy: true});
+        navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 0, timeout: 5000, enableHighAccuracy: true});
 
     });
                     
@@ -1051,5 +1051,48 @@ function sitioValido(){
         return true;
     }
  
+    
+}
+
+function geolocalizarMapa(){
+    
+    var intentos_g = 1;
+    
+    function ubicacionExito(p){
+        if(intentos_g < 10 && p.coords.accuracy > 350){
+            //console.log("Poca presicion en intento "+intentos_g);
+            intentos_g++;
+            navigator.geolocation.getCurrentPosition(ubicacionExito, ubicacionFallo, {maximumAge: 0, timeout: 5000, enableHighAccuracy: true})
+            return;
+            
+        }
+        else if(intentos_g==10){
+            
+            alert("No se pudo obtener una ubicacion precis");
+            return;
+        }
+        
+        //console.log(p.coords.longitude+" "+p.coords.latitude);
+        
+        coord_p = new OpenLayers.LonLat(p.coords.longitude,p.coords.latitude);
+        coord_p = coord_p.transform(new OpenLayers.Projection("EPSG:4326"),map.getProjectionObject());
+        
+        map.setCenter(coord_p,17);
+        
+        var point = new OpenLayers.Geometry.Point(coord_p.lon, coord_p.lat);
+        
+        console.log(point);
+        
+        
+    }
+    
+    
+    function ubicacionFallo(){
+        alert("No se pudo obtener la ubicacion\nAsegurese de tener GPS y/o Wifi activado");
+    }
+    
+    
+    
+    navigator.geolocation.getCurrentPosition(ubicacionExito, ubicacionFallo, {maximumAge: 0, timeout: 5000, enableHighAccuracy: true});
     
 }

@@ -6,14 +6,42 @@
         <title>Map</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <link rel="stylesheet" href="css/jquery.mobile-1.2.0.min.css">
-        <script src="js/lib/jquery.min.js"></script>
-        <script src="js/lib/jquery.mobile-1.2.0.min.js"></script>
+        <link rel="stylesheet" href="css/jquery.mobile-1.2.0.min.css">   
         <link rel="stylesheet" href="css/style.mobile.css" type="text/css">
         <link rel="stylesheet" href="css/style.mobile-jq.css" type="text/css">
+        <script src="js/lib/cordova-2.1.0.js"></script>
+        <script src="js/lib/jquery.min.js"></script>
+        <script src="js/lib/jquery.mobile-1.2.0.min.js"></script>
         <script src="js/lib/OpenLayers.mobile.js"></script>
         <script src="js/lib/mobile-base.js"></script>
         <script src="js/lib/mobile-jq.js"></script>
+        <script src="js/lib/useful_functions.js"></script>
+        <script src="js/main.js"></script>
+        <script src="js/modelo.js"></script>
+        <script src="js/controlador.js"></script>
+        <script>
+            document.addEventListener("deviceready", onDeviceReady, false);
+            
+            function onDeviceReady(){
+                var style = OpenLayers.Util.extend({
+                    externalGraphic: "${icon}",
+                    pointRadius: 15
+                }, OpenLayers.Feature.Vector.style['default']);
+                
+                
+                
+                var vector = new OpenLayers.Layer.Vector("Vector Layer", {style: style});
+                
+                map.addLayer(vector);
+                
+                    
+                $('.geolocate').click(function(){
+                   geolocalizarMapa();
+                });
+                
+            }
+            
+        </script>
     </head>
     <body>
         
@@ -21,22 +49,38 @@
         
 
         <div data-role="page" id="mappage">
+          
+           <div data-role="header">
+               <a href="sesion.html" data-ajax="false" data-icon="back">Regresar</a>
+               <h1></h1>
+               <a href="#" class="geolocate" data-icon="star">Mi posición</a>
+           </div>
+            
+            
+            
           <div data-role="content">
             <div id="map"></div>
           </div>
 
           <div data-role="footer">
-              <a href="sesion.html" data-ajax="false">Volver</a>
-              <div id="navigation" data-role="controlgroup" data-type="vertical">
-            <a href="#" data-role="button" data-icon="plus" id="plus"
-               data-iconpos="notext"></a>
-            <a href="#" data-role="button" data-icon="minus" id="minus"
-               data-iconpos="notext"></a>
-          </div
+            
+            
+              
+            <div id="navigation" data-role="controlgroup" data-type="vertical">
+                
+                <a href="#" data-role="button" data-icon="plus" id="plus"
+                data-iconpos="notext"></a>
+                <a href="#" data-role="button" data-icon="minus" id="minus"
+                data-iconpos="notext"></a>
+            </div>
+              
+            <a href="#" data-icon="search"  data-role="button">Search</a>
             
           </div>
           
         </div>
+        
+        
 
         
 

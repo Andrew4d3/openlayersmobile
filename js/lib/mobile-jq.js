@@ -7,10 +7,11 @@ var selectedFeature = null;
 function fixContentHeight() {
     var footer = $("div[data-role='footer']:visible"),
         content = $("div[data-role='content']:visible:visible"),
+        header = $("div[data-role='header']:visible"),
         viewHeight = $(window).height(),
-        contentHeight = viewHeight - footer.outerHeight();
+        contentHeight = viewHeight - footer.outerHeight() - header.outerHeight();
 
-    if ((content.outerHeight() + footer.outerHeight()) !== viewHeight) {
+    if ((content.outerHeight() + footer.outerHeight() + header.outerHeight()) !== viewHeight) {
         contentHeight -= (content.outerHeight() - content.height() + 1);
         content.height(contentHeight);
     }
@@ -19,11 +20,16 @@ function fixContentHeight() {
         map.updateSize();
     } else {
         // initialize map
+        
+        init();
+        
+        /*
         init(function(feature) { 
             selectedFeature = feature; 
             $.mobile.changePage("#popup", "pop"); 
         });
         //initLayerList();
+        */
     }
 }
 
@@ -97,6 +103,8 @@ function initLayerList() {
     });
 }
 */
+
+/*
 function addLayerToList(layer) {
     var item = $('<li>', {
             "data-icon": "check",
@@ -121,3 +129,4 @@ function addLayerToList(layer) {
         }
     });
 }
+*/

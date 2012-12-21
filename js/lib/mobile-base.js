@@ -7,10 +7,12 @@ var map;
 var gg = new OpenLayers.Projection("EPSG:4326");
 var sm = new OpenLayers.Projection("EPSG:900913");
 
-var init = function (onSelectFeatureFunction) {
-    console.log("mapa cargado");
+var init = function () {
+    
+    /*
     var vector = new OpenLayers.Layer.Vector("Vector Layer", {});
 
+    
     var sprintersLayer = new OpenLayers.Layer.Vector("Sprinters", {
         styleMap: new OpenLayers.StyleMap({
             externalGraphic: "img/mobile-loc.png",
@@ -20,14 +22,14 @@ var init = function (onSelectFeatureFunction) {
             graphicYOffset: -26
         })
     });
-
-    var sprinters = getFeatures();
-    sprintersLayer.addFeatures(sprinters);
+    
+    //var sprinters = getFeatures();
+    //sprintersLayer.addFeatures(sprinters);
 
     var selectControl = new OpenLayers.Control.SelectFeature(sprintersLayer, {
         autoActivate:true,
         onSelect: onSelectFeatureFunction});
-
+    
     var geolocate = new OpenLayers.Control.Geolocate({
         id: 'locate-control',
         geolocationOptions: {
@@ -36,11 +38,12 @@ var init = function (onSelectFeatureFunction) {
             timeout: 7000
         }
     });
+    */
     // create map
     map = new OpenLayers.Map({
         div: "map",
         theme: null,
-        projection: sm,
+        //projection: gg,
         numZoomLevels: 18,
         controls: [
             new OpenLayers.Control.Attribution(),
@@ -48,14 +51,15 @@ var init = function (onSelectFeatureFunction) {
                 dragPanOptions: {
                     enableKinetic: true
                 }
-            }),
+            })/*,
             geolocate,
             selectControl
+            */
         ],
         layers: [
             new OpenLayers.Layer.OSM("OpenStreetMap", null, {
                 transitionEffect: 'resize'
-            }),
+            })/*,
             new OpenLayers.Layer.Bing({
                 key: apiKey,
                 type: "Road",
@@ -81,18 +85,20 @@ var init = function (onSelectFeatureFunction) {
             }),
             vector,
             sprintersLayer
-        ],
+        */],
         center: new OpenLayers.LonLat(0, 0),
         zoom: 1
     });
-
+    
+    /*
     var style = {
         fillOpacity: 0.1,
         fillColor: '#000',
         strokeColor: '#f00',
         strokeOpacity: 0.6
     };
-    geolocate.events.register("locationupdated", this, function(e) {
+    */
+    /*geolocate.events.register("locationupdated", this, function(e) {
         vector.removeAllFeatures();
         vector.addFeatures([
             new OpenLayers.Feature.Vector(
@@ -118,10 +124,10 @@ var init = function (onSelectFeatureFunction) {
             )
         ]);
         map.zoomToExtent(vector.getDataExtent());
-    });
+    });*/
 
 
-
+    /*
     function getFeatures() {
         var features = {
             "type": "FeatureCollection",
@@ -158,7 +164,7 @@ var init = function (onSelectFeatureFunction) {
                     "properties": {"Name": "Andreas Hocevar", "Country":"Austria", "City":"Graz"}},
                 { "type": "Feature", "geometry": {"type": "Point", "coordinates": [-12362007.067301,5729082.2365672]},
                     "properties": {"Name": "Tim Schaub", "Country":"United States of America", "City":"Bozeman"}}
-            */
+            
             ]
         };
 
@@ -166,5 +172,6 @@ var init = function (onSelectFeatureFunction) {
 
         return reader.read(features);
     }
+    */
 
 };
