@@ -489,6 +489,12 @@ function cargarSitio(sitio){
     
     });
     
+    $('#perfil-sitio .irmapa').click(function(){
+
+        sessionStorage.setItem('cargar_punto',"sitio");
+        sessionStorage.setItem('punto_sitio',sitio.id);    
+    });      
+    
     //Evento que borrara el sitio actual
     $('#perfil-sitio .borrar').click(function(e){
         //Evitamos el comportamiento por defecto
@@ -805,6 +811,12 @@ function cargarCheckpoint(checkpoint){
     
     });
     
+    $('#perfil-checkpoint .irmapa').click(function(){
+
+        sessionStorage.setItem('cargar_punto',"checkpoint");
+        sessionStorage.setItem('punto_checkpoint',checkpoint.id);    
+    });    
+    
     $('#perfil-checkpoint .check-in').click(function(e){
         //Evitamos propagacion y evitamos el comportamiento por defento del boton
        
@@ -1025,7 +1037,7 @@ function esta_cerca(lat1,lon1,lat2,lon2){
 
 
 }
-
+//Funcion para validar que una categoria sea valida
 function categoriaValida(){
     
     if($('#nombre_cat').val()==""){
@@ -1039,7 +1051,7 @@ function categoriaValida(){
  
     
 }
-
+//Funcion para validar que un sitio sea valido
 function sitioValido(){
     
     if($('#nombre').val()==""){
@@ -1053,46 +1065,239 @@ function sitioValido(){
  
     
 }
-
+//Funcion para indicar la ubicacion actual del usuario en el mapa
 function geolocalizarMapa(){
-    
+    //Intentos de geolocalizacion en caso de que no se haya obtenido una buena precision
     var intentos_g = 1;
     
     function ubicacionExito(p){
         if(intentos_g < 10 && p.coords.accuracy > 350){
-            //console.log("Poca presicion en intento "+intentos_g);
+            //Si no se obtiene una buena precision se vuelve a solicitar una ubicacion
             intentos_g++;
             navigator.geolocation.getCurrentPosition(ubicacionExito, ubicacionFallo, {maximumAge: 0, timeout: 5000, enableHighAccuracy: true})
             return;
             
         }
         else if(intentos_g==10){
-            
-            alert("No se pudo obtener una ubicacion precis");
+            //Si despues de 10 intentos no se ha podido obtener una posicion con buena presicion se le indica al usuario
+            alert("No se pudo obtener una ubicacion precisa");
             return;
         }
         
-        //console.log(p.coords.longitude+" "+p.coords.latitude);
-        
+        //Si se llega aqui es porque se pudo obtener una ubicacion con buena precision y se procede a crear el objeto de coordenadas
         coord_p = new OpenLayers.LonLat(p.coords.longitude,p.coords.latitude);
-        coord_p = coord_p.transform(new OpenLayers.Projection("EPSG:4326"),map.getProjectionObject());
+        coord_p = coord_p.transform(new OpenLayers.Projection("EPSG:4326"),map.getProjectionObject()); // Se hace la transformacion de proyecciones para que coincida con la del mapa cargado
         
+        //Se centra la pantalla en la ubicacion actual utilizando el objeto de coordenadas creado
         map.setCenter(coord_p,17);
         
-        var point = new OpenLayers.Geometry.Point(coord_p.lon, coord_p.lat);
-        
-        console.log(point);
-        
+        //Se crea una punto (gemetria) con las coordenadas de la posicion actual
+        point = new OpenLayers.Geometry.Point(coord_p.lon, coord_p.lat);
+        //Se crea un feature en el punto creado anteriormente utilizando el icono(figura) definida para ubicacion actual
+        feature = new OpenLayers.Feature.Vector(point,null, locationIcon);
+        //Se borran las features que ya estaban en el mapa
+        layer.removeAllFeatures();
+        //Se agrega la feature que se acaba de crear
+        layer.addFeatures([feature]);
         
     }
     
-    
+    //Funcion de fallo
     function ubicacionFallo(){
         alert("No se pudo obtener la ubicacion\nAsegurese de tener GPS y/o Wifi activado");
     }
     
-    
-    
+    //Llamado a la funcion de geolocolizacion con las funciones correspondientes de fallo y exito
     navigator.geolocation.getCurrentPosition(ubicacionExito, ubicacionFallo, {maximumAge: 0, timeout: 5000, enableHighAccuracy: true});
+}
+
+//Funcion que muestra TODOS los checkpoints del usuario de sesion EN EL MAPA
+function poblarCheckpoints(){
+    //Borramos los features que ya estaban desplegados en el mapa
+    layer.removeAllFeatures();
+    //Obtenemos el id del usuario en sesion
+    id_usuario = sessionStorage.getItem('user-id');
+    c = new Checkpoints();
+    //Obtenemos los checkpoints del usuario usando el metodo del modelo
+    c.listar(id_usuario, function(checkpoints){
+        //Si hay checkpoints iteramos sobre el arreglo
+        if(checkpoints.length>0){
+            for(j=0;j<checkpoints.length;j++){
+                //Creamos el objeto de coordenadas del respectivo checkpoint
+                coord_check = new OpenLayers.LonLat(checkpoints[j].longitud,checkpoints[j].latitud);
+                coord_check = coord_check.transform(new OpenLayers.Projection("EPSG:4326"),map.getProjectionObject());
+                //Creamos el punto(geometria) del checkpoint en cuestion
+                point = new OpenLayers.Geometry.Point(coord_check.lon, coord_check.lat);
+                //Verificamos si el checkpoint fue visitado o no
+                if(checkpoints[j].checked_in==1){
+                    //Si fue visitado le asiganos el icono correspondiete
+                    feature = new OpenLayers.Feature.Vector(point,checkpoints[j], checkpointVisitado);
+                }
+                else{
+                    //Sino fue visitado le asiganos el icono correspondiete
+                    feature = new OpenLayers.Feature.Vector(point,checkpoints[j], checkpointPendiente);
+                }
+            
+                layer.addFeatures([feature]);
+            }        
+        }
+        
+    });
+    //Cerramos el Popup para que se pueda ver los checkpoints agregados
+    $('#mostrar').popup('close');
+}
+
+//Funcion que muestra los sitios de una determinada categoria en el mapa
+//Hace lo mismo que la de poblarCheckpoints solo que esta ves con sitios
+function poblarSitios(id_categoria){
+    
+    layer.removeAllFeatures();
+    id_usuario = sessionStorage.getItem('user-id');
+    
+    if(id_categoria == "null"){
+        categoria_sitio = "is NULL";
+    }
+    else{
+        categoria_sitio = "="+id_categoria;
+    }
+    
+    var s = new Sitios();
+    
+    s.listarC(id_usuario, categoria_sitio, function(sitios){
+        
+        if(sitios.length>0){
+            for(j=0;j<sitios.length;j++){
+                
+                coord_sitio = new OpenLayers.LonLat(sitios[j].longitud,sitios[j].latitud);
+                coord_sitio = coord_sitio.transform(new OpenLayers.Projection("EPSG:4326"),map.getProjectionObject());
+                
+                point = new OpenLayers.Geometry.Point(coord_sitio.lon, coord_sitio.lat);
+                
+                feature = new OpenLayers.Feature.Vector(point,sitios[j], sitioIcon);
+                
+                layer.addFeatures([feature]);
+                
+            }
+        }
+
+    });
+    
+    $('#mostrar').popup('close');
+    
     
 }
+//Funcion que muestra UN SOLO sitio en el Mapa. Se utiliza luego que el usuario hace uso de la funcion "Ver en Mapa" en el perfil de un sitio
+function poblarSitio(sitio){
+    coord_sitio = new OpenLayers.LonLat(sitio.longitud,sitio.latitud);
+    coord_sitio = coord_sitio.transform(new OpenLayers.Projection("EPSG:4326"),map.getProjectionObject());
+    point = new OpenLayers.Geometry.Point(coord_sitio.lon, coord_sitio.lat);
+    feature = new OpenLayers.Feature.Vector(point,sitio, sitioIcon);
+    layer.addFeatures([feature]);
+    
+    map.setCenter(coord_sitio,17);
+    
+}
+//Funcion que muestra UN SOLO checkpoint en el Mapa. Se utiliza luego que el usuario hace uso de la funcion "Ver en Mapa" en el perfil de un checkpoint
+function poblarCheckpoint(checkpoint){
+    coord_check = new OpenLayers.LonLat(checkpoint.longitud,checkpoint.latitud);
+    coord_check = coord_check.transform(new OpenLayers.Projection("EPSG:4326"),map.getProjectionObject());
+    point = new OpenLayers.Geometry.Point(coord_check.lon, coord_check.lat);
+    if(checkpoint.checked_in==1){
+        feature = new OpenLayers.Feature.Vector(point,checkpoint, checkpointVisitado);
+    }
+    else{
+        feature = new OpenLayers.Feature.Vector(point,checkpoint, checkpointPendiente);
+    }
+    layer.addFeatures([feature]);   
+    
+    map.setCenter(coord_check,17);
+}
+
+//Funcion que se ejecuta cuando se da click en un feature (sea sitio o checkpoint) que carga los datos del feature el popup desplegado
+function mostrarPopupFeature(feature){
+    
+    //Si el feature es un sitio se realizan las acciones indicadas
+    if(feature.feature.data.__proto__.constructor.name=="sitio"){
+        //Abrimos el popup
+        $('#sitio').popup();
+        $('#sitio').popup("open");
+        //Guardamos el objeto asociado al feature
+        sitio = feature.feature.attributes;
+        
+        //Imprimimos los datos del objeto en el HTML del popup
+        $('#sitio-nombre').html(sitio.nombre);
+        $('#sitio-fecha').html(sitio.fecha);
+      
+        if(sitio.descripcion!=""){
+            $('#sitio-descripcion').html(sitio.descripcion);
+        }
+        else{
+            $('#sitio-descripcion').html("(No hay descripción)");
+        }
+        //Se activa el evento del boton de "Ver Perfil completo" el cual cargara el perfil completo del sitio
+        $('#sitio .irperfil').click(function(){
+            //Guardamos las variables de sesion que indican que sitio se cargara en sesion.html
+            sessionStorage.setItem('cargar_perfil',"sitio");
+            sessionStorage.setItem('perfil_sitio',sitio.id);
+        });
+
+
+
+    }
+    //Lo mismo que el if anterior pero esta ven con un checkpoint
+    else if(feature.feature.data.__proto__.constructor.name=="checkpoint"){
+        $('#checkpoint').popup();
+        $('#checkpoint').popup("open");
+        checkpoint = feature.feature.attributes;
+
+        $('#checkpoint-nombre').html(checkpoint.nombre);
+        $('#checkpoint-fecha').html(checkpoint.fecha);
+        
+
+        if(checkpoint.descripcion!=""){
+            $('#checkpoint-descripcion').html(checkpoint.descripcion);
+        }
+        else{
+            $('#checkpoint-descripcion').html("(No hay descripción)");
+        }
+
+        if(checkpoint.checked_in==1){
+            $('#checkpoint-status').html("Checkpoint Visitado");
+        }
+        else{
+            $('#checkpoint-status').html("Checkpoint sin visitar");
+        }
+
+        if(checkpoint.info!=""){
+            $('#checkpoint-info').html(checkpoint.info);
+        }
+        else{
+            $('#checkpoint-info').html("(Sin Información)");
+        }
+        
+        
+        $('#checkpoint .irperfil').click(function(){
+            sessionStorage.setItem('cargar_perfil',"checkpoint");
+            sessionStorage.setItem('perfil_checkpoint',checkpoint.id);
+        });        
+
+    }   
+    
+    
+}
+
+//Funcion que cambia el tipo de mapa en el caso de que se haya seleccionado como servicio de mapas a Bing o google
+function cambiarTipoMapa(){
+    if(localStorage.getItem('tipo_mapa')=="google" || localStorage.getItem('tipo_mapa')=="bing"){
+        //Buscamos el valor de la opcion seleccionada que indica la posicion del arreglo donde esta el layer a cargar
+        new_tipo_mapa=parseInt($('#select-mapa option:selected').val());
+        //Establecemos el layer como capa base
+        map.setBaseLayer(map.layers[new_tipo_mapa]);
+        
+        
+    }
+    
+    
+    
+}
+

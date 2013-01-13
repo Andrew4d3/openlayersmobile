@@ -13,31 +13,155 @@
         <script src="js/lib/jquery.min.js"></script>
         <script src="js/lib/jquery.mobile-1.2.0.min.js"></script>
         <script src="js/lib/OpenLayers.mobile.js"></script>
+        <script src="js/lib/maps-services.js"></script>
         <script src="js/lib/mobile-base.js"></script>
         <script src="js/lib/mobile-jq.js"></script>
         <script src="js/lib/useful_functions.js"></script>
+        
+        <script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAjpkAC9ePGem0lIq5XcMiuhR_wWLPFku8Ix9i2SXYRVK3e45q1BQUd_beF8dtzKET_EteAjPdGDwqpQ'></script>
+        
         <script src="js/main.js"></script>
         <script src="js/modelo.js"></script>
         <script src="js/controlador.js"></script>
+        <style>
+            #mostrar fieldset{
+                margin: 5px;
+            }
+            
+            dt{
+                background-color: #ddd;
+                font-weight: bold;
+            }
+
+            
+        </style>
         <script>
             document.addEventListener("deviceready", onDeviceReady, false);
             
+            //A continuacion se listan los iconos(figuras) que utiliza la aplicacion para mostrar sitios o checkpoints
+            
+            //Icono que describe la posicion actual del usuario
+            var locationIcon = OpenLayers.Util.extend({
+                    externalGraphic: "img/location.png",
+                    graphicWidth: 32,
+                    graphicHeight: 32,
+                    pointRadius: 10,
+                    graphicOpacity: 1
+            }, OpenLayers.Feature.Vector.style['default']);
+            //Icono que describe un checkpoint visitado
+            var checkpointVisitado = OpenLayers.Util.extend({
+                    externalGraphic: "img/flag_blue.png",
+                    graphicWidth: 20,
+                    graphicHeight: 20,
+                    pointRadius: 0,
+                    graphicOpacity: 1
+            }, OpenLayers.Feature.Vector.style['default']);
+            //Icono que describe un checkpoint sin visitar
+            var checkpointPendiente = OpenLayers.Util.extend({
+                    externalGraphic: "img/flag_red.png",
+                    graphicWidth: 20,
+                    graphicHeight: 20,
+                    pointRadius: 10,
+                    graphicOpacity: 1
+            }, OpenLayers.Feature.Vector.style['default']);
+            //Icono que describe un sitio
+            var sitioIcon = OpenLayers.Util.extend({
+                    externalGraphic: "img/sitio.png",
+                    graphicWidth: 20,
+                    graphicHeight: 20,
+                    pointRadius: 10,
+                    graphicOpacity: 1
+            }, OpenLayers.Feature.Vector.style['default']);
+            //Creamos el objeto capa(o layer) que mostrara los sitios y checkpoits (conocidos como features)
+            var layer = new OpenLayers.Layer.Vector("Capa de Features");
+            //Agregamos el objeto control que administrara los eventos de los features
+            var selectFeature = new OpenLayers.Control.SelectFeature(layer);
+            
+            
+            
             function onDeviceReady(){
-                var style = OpenLayers.Util.extend({
-                    externalGraphic: "${icon}",
-                    pointRadius: 15
-                }, OpenLayers.Feature.Vector.style['default']);
+                //Cargamos los valores iniciales del mapa (se encuentran en main.js)
+                mapaInicial();
+                //Agregamos la capa de features
+                map.addLayer(layer);
+                map.addControl(selectFeature); //Agregamos el control de eventos de los features
+                selectFeature.activate(); //Activamos el control de eventos de los features
                 
-                
-                
-                var vector = new OpenLayers.Layer.Vector("Vector Layer", {style: style});
-                
-                map.addLayer(vector);
-                
-                    
+                //Cargamos las categorias de sitios en el select (se encuentra en main.js)
+                selectSitios();
+                //Verificamos si el usuario ha entrado el mapa desde el perfil de un sitio o checkpoint verificando la respectiva bandera guardada en una variable de sesion
+                if(sessionStorage.getItem('cargar_punto')=="sitio"){
+                   sessionStorage.removeItem('cargar_punto'); //Removemos la variable de sesion
+                   id_sitio = sessionStorage.getItem('punto_sitio'); //Consultamos el sitio a Mostrar su ubicacion en el mapa
+                   //Llamamos a la funcion para cargar el feature en el mapa
+                   s = new Sitios();
+                   s.consultar(id_sitio, poblarSitio);
+                 }
+                //Se realiza igualmente que con el sitio
+                else if(sessionStorage.getItem('cargar_punto')=="checkpoint"){
+                   sessionStorage.removeItem('cargar_punto');
+                   id_checkpoint = sessionStorage.getItem('punto_checkpoint');
+                   c = new Checkpoints();
+                   c.consultar(id_checkpoint, poblarCheckpoint);
+                }
+                //Boton Geolocalizar   
                 $('.geolocate').click(function(){
                    geolocalizarMapa();
                 });
+                
+                //Si se activa el radio buton de sitios se debe mostrar el select de las categorias de los sitios
+                $('input[name=mostrar-op]:radio').change(function(){
+                    if ($('#mostrar-sitios:checked').val() == 'true') {
+                        $('#select-sitios').parent().show();
+                    }
+                    else{
+                        $('#select-sitios').parent().hide();
+                    }
+                });
+                
+                $('#select-mapa').change(function(){
+                    cambiarTipoMapa();
+                });
+                
+                
+                //Si se da aplicar a las opciones del popup mostrar
+                $('#mostrar .aplicar').click(function(){
+                    if ($('#mostrar-checkpoints:checked').val() == 'true') {
+                        poblarCheckpoints();
+                    }
+                    else if($('#mostrar-nada:checked').val() == 'clear'){
+                        layer.removeAllFeatures();
+                        $('#mostrar').popup('close');
+                    }
+                    else if($('#mostrar-sitios:checked').val() == 'true') {
+                        poblarSitios($('#select-sitios option:selected').val());
+                    }
+                    
+                    
+                });
+                
+                layer.events.on({
+                    'featureselected': function(feature) {                  
+                        mostrarPopupFeature(feature);        
+                    }
+                });
+                
+                
+                $('div[data-role="popup"]').bind('popupafterclose',function(){
+                    //Al cerrar un popup se deben deseleccionar las features seleccionadas(con click) y parar el listener de ir a perfil para evitar propagacion
+                    $('.irperfil').unbind('click');
+                    selectFeature.unselectAll();                    
+                });
+                
+                
+                
+                
+                
+                
+                //Se coloca aqui porque Bing da un extraño error con el setBaselayer. Siempre colocar de ultimo despues de que estan activados todos los listeners y scripts
+                if(localStorage.getItem('tipo_mapa')=="bing"){
+                    map.setBaseLayer(map.layers[1]);
+                }
                 
             }
             
@@ -62,21 +186,93 @@
             <div id="map"></div>
           </div>
 
-          <div data-role="footer">
-            
-            
-              
-            <div id="navigation" data-role="controlgroup" data-type="vertical">
-                
-                <a href="#" data-role="button" data-icon="plus" id="plus"
-                data-iconpos="notext"></a>
-                <a href="#" data-role="button" data-icon="minus" id="minus"
-                data-iconpos="notext"></a>
+            <div data-role="footer">
+
+                <div id="navigation" data-role="controlgroup" data-type="vertical">
+
+                    <a href="#" data-role="button" data-icon="plus" id="plus"
+                    data-iconpos="notext"></a>
+                    <a href="#" data-role="button" data-icon="minus" id="minus"
+                    data-iconpos="notext"></a>
+                </div>
+
+                <div class="ui-grid-a">
+                    <div class="ui-block-a">
+                        <a href="#mostrar" data-role="button" data-mini="true" data-rel="popup"  data-position-to="window">Mostrar</a>
+
+                    </div>
+
+                    <div class="ui-block-b">
+                        <select id="select-mapa" data-theme="a" data-mini="true">
+                            <option value="default">Por defecto</option>
+
+                        </select>            
+                    </div>
+                </div>
+
             </div>
-              
-            <a href="#" data-icon="search"  data-role="button">Search</a>
             
-          </div>
+            <div  id="mostrar" data-role="popup" style="min-width:200px">
+                <div data-role="header"><h5>Mostrar</h5></div>
+                <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+                <fieldset data-role="controlgroup">
+                    <legend>Seleccione información a mostrar:</legend>
+                    <input type="radio" name="mostrar-op" id="mostrar-checkpoints" value="true" />
+                    <label for="mostrar-checkpoints">Checkpoints</label>
+                    
+                    <input type="radio" name="mostrar-op" id="mostrar-sitios" value="true" />
+                    <label for="mostrar-sitios">Sitios</label>
+                    <select id="select-sitios" data-theme="b" data-mini="true">
+                            <option value="default">(Sin Categoría)</option>
+                    </select> 
+                    
+
+                    <input type="radio" name="mostrar-op" id="mostrar-nada" value="clear"  />
+                    <label for="mostrar-nada">Nada (Limpiar Mapa)</label>
+                    
+                </fieldset>
+                <a href="#" class="aplicar" data-role="button">Aplicar</a>
+
+            </div>
+            
+            <div  id="sitio" data-role="popup" style="min-width:200px">
+                <div data-role="header"><h5>Sitio</h5></div>
+                <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+                <dl style="margin: 5px">
+                    <dt >Nombre</dt>
+                    <dd id="sitio-nombre">I'm the definition text</dd>
+                    <dt>Fecha y hora de creación</dt>
+                    <dd id="sitio-fecha">I'm the definition text</dd>
+                    <dt>Descripción</dt>
+                    <dd id="sitio-descripcion">I'm the definition text</dd>
+
+                    
+                </dl>
+                <a href="sesion.html" data-ajax="false" data-role="button" class="irperfil" style="margin: 5px">Perfil Completo</a>
+
+            </div>
+            
+            <div  id="checkpoint" data-role="popup" style="min-width:220px">
+                <div data-role="header"><h5>Checkpoint</h5></div>
+                <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+                <dl style="margin: 5px">
+                    <dt >Nombre</dt>
+                    <dd id="checkpoint-nombre">I'm the definition text</dd>
+                    <dt>Fecha y hora de creación</dt>
+                    <dd id="checkpoint-fecha">I'm the definition text</dd>
+                    <dt>Descripción</dt>
+                    <dd id="checkpoint-descripcion">I'm the definition text</dd>
+                    <dt>Estado Actual</dt>
+                    <dd id="checkpoint-status">I'm the definition text</dd>
+                    <dt>Información para el usuario</dt>
+                    <dd id="checkpoint-info">I'm the definition text</dd>
+
+                    
+                </dl>
+                <a href="sesion.html" data-ajax="false" data-role="button" class="irperfil" style="margin: 5px">Perfil Completo</a>
+
+            </div>
+            
           
         </div>
         

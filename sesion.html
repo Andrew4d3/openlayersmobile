@@ -44,7 +44,23 @@ and open the template in the editor.
                         }
                     }, false);
 
+                    
+                    if(sessionStorage.getItem('cargar_perfil')=="sitio"){
+                        sessionStorage.removeItem('cargar_perfil');
+                        sessionStorage.setItem('back_perfil-sitio',"home");
+                        s = new Sitios();
+                        s.consultar(sessionStorage.getItem('perfil_sitio'), cargarSitio);
+                        $.mobile.changePage($('#perfil-sitio'));
+                    }
+                    else if(sessionStorage.getItem('cargar_perfil')=="checkpoint"){
+                        sessionStorage.removeItem('cargar_perfil');
+                        sessionStorage.setItem('back_perfil-checkpoint',"home");
+                        c = new Checkpoints();
+                        c.consultar(sessionStorage.getItem('perfil_checkpoint'), cargarCheckpoint);
+                        $.mobile.changePage($('#perfil-checkpoint'));
                         
+                    }
+                    
 
                     user=sessionStorage.getItem('user');
                  
@@ -244,7 +260,7 @@ and open the template in the editor.
                 <div data-role="navbar"  data-iconpos="right">
                     <ul>
                         <li><a class="editar" href="#" >Editar</a></li>
-                        <li><a href="#" >Ver en Mapa</a></li>
+                        <li><a href="map.html" data-ajax="false" class="irmapa">Ver en Mapa</a></li>
                         <li><a class="borrar" href="#" >Borrar</a></li>
                     </ul>
                 </div>
@@ -304,7 +320,7 @@ and open the template in the editor.
                 <div data-role="navbar"  data-iconpos="right">
                     <ul>
                         <li><a class="check-in" href="#" >Hacer Check-in</a></li>
-                        <li><a href="#" >Ver en Mapa</a></li>
+                        <li><a href="map.html" data-ajax="false" class="irmapa">Ver en Mapa</a></li>
                         
                     </ul>
                 </div>
