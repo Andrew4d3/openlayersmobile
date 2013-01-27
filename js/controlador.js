@@ -96,7 +96,7 @@ function nuevoSitio(){
         if(intentos_g < 10 && position.coords.accuracy > 350){
             //console.log("Poca presicion en intento "+intentos_g);
             intentos_g++;
-            navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 0, timeout: 5000, enableHighAccuracy: true})
+            navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 0, timeout: 8000, enableHighAccuracy: true})
             return;
             
         }
@@ -160,7 +160,7 @@ function nuevoSitio(){
     }
     //Aqui se hace la llamada para obtner los datos de geolocalizacion, se le pasa como argumenta las funciones callback de exito y fallo explicadas anteriormente.
     //Esta accion es la que se ejecuta despues de ocultar el footer
-    navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 0, timeout: 5000, enableHighAccuracy: true})
+    navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 0, timeout: 8000, enableHighAccuracy: true})
 
     //Si se da al boton regresar, se regresa a la pantalla de inicio y se ejecuta esta funcion
     $('#nuevo_sitio .regresar').click(function(){
@@ -177,7 +177,7 @@ function nuevoSitio(){
         //Se desactuva el evento de continuar, ya que este sera iniciado nuevamente en la funcion de exito de la llamada a geolocalizacion, y asi se evita la propagacion innecesaria
         $('#nuevo_sitio .continuar').unbind('click');
         //Se hace la misma llamada de geolocalizacion con sus respectivas funciones callback de fallo y exito
-        navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 0, timeout: 5000, enableHighAccuracy: true});
+        navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 0, timeout: 8000, enableHighAccuracy: true});
 
     });
                     
@@ -330,7 +330,7 @@ function listarSitios(){
                     id_cat = "cat-null";
                     //Empesamos a construir el HTML con los datos del arreglo de sitios (es un arreglo de objetos "sitio", ver modelo para mas informacion)
                     stream = '<li class="sitio" id="sitio-'+sitios[j].id+'" ><a href="#">\n';
-                    stream += '<img src="img/no-image.png" />\n';
+                    stream += '<img style="margin-top:5px" src="img/sitio_perfil.png" />\n';
                     stream += '<h3>'+sitios[j].nombre+'</h3>\n';
                     stream += '<p>'+sitios[j].descripcion+'</p>\n';
                     stream += '</a></li>\n'
@@ -371,7 +371,7 @@ function listarSitios(){
                             id_cat = "cat-"+sitios[j].id_categoria;
                             //Empezamos a constrior el HTML a agregar con los datos del arreglo de sitios
                             stream = '<li class="sitio" id="sitio-'+sitios[j].id+'" ><a href="#">\n';
-                            stream += '<img src="img/no-image.png" />\n';
+                            stream += '<img style="margin-top:5px" src="img/sitio_perfil.png" />\n';
                             stream += '<h3>'+sitios[j].nombre+'</h3>\n';
                             stream += '<p>'+sitios[j].descripcion+'</p>\n';
                             stream += '</a></li>\n'
@@ -444,13 +444,7 @@ function cargarSitio(sitio){
     else{
          $('#sitio-descripcion').html(sitio.descripcion);
     }
-    //Si no tiene fotografia se asigna la fotografia por defecto de "no-image"
-    if(sitio.url_imagen=="null"){
-        $('#sitio-imagen').html('<img src="img/no-image.png" />');
-    }
-    else{
-         //Pendiente
-    }
+    
     //Cargamos la URL del minimapa de google con los datos de latitud y longitud del sitio
     mini_mapa = "http://maps.google.com/maps/api/staticmap?center="+sitio.latitud+","+sitio.longitud+"&"+"&zoom=16&markers=size:small|"+sitio.latitud+","+sitio.longitud+"&maptype=hybrid&size=200x200&sensor=false";
     //La cargamos en el HTML
@@ -613,6 +607,12 @@ function editarSitio(sitio){
     $('#nueva_categoria form').submit(function(e){
         e.stopImmediatePropagation(); //evitamos propagacion
         //Guardamos los datos del formulario en variables. No es necesario validar su existencia o tamaña, ya que el codigo html se encarga de ello (atributos required y maxlength)
+        
+        if(!categoriaValida()){               
+            return false;
+        }
+        
+        
         nombre=$('#nombre_cat').val();
         descripcion=$('#descripcion_cat').val();
         //Creamos la categoria en la Base de datos. La variable de sincronizado esta en 0 (de falso) y la de servidor_id en null ya que todavia no se ha sincronizado con el servidor
@@ -698,7 +698,15 @@ function listarCheckpoints(){
             for(j=0;j<checkpoints.length;j++){
                 //Empezamos a construir el HTML a agregar con los datos del arreglo de checkpoints
                 stream = '<li class="checkpoint" id="checkpoint-'+checkpoints[j].id+'" ><a href="#">\n';
-                stream += '<img src="img/no-image.png" />\n';
+                
+                if(checkpoints[j].checked_in==1){
+                    stream += '<img src="img/check_1.png" />\n';
+                }
+                else{
+                    stream += '<img src="img/check_0.png" />\n';
+                }
+                
+                
                 stream += '<h3>'+checkpoints[j].nombre+'</h3>\n';
                 stream += '<p>'+checkpoints[j].descripcion+'</p>\n';
                 stream += '</a></li>\n'
@@ -763,13 +771,7 @@ function cargarCheckpoint(checkpoint){
     else{
          $('#checkpoint-descripcion').html(checkpoint.descripcion);
     }
-    //Si no tiene fotografia se asigna la fotografia por defecto de "no-image"
-    if(checkpoint.url_imagen==""){
-        $('#checkpoint-imagen').html('<img src="img/no-image.png" />');
-    }
-    else{
-         //Pendiente
-    }
+    
     
     
      //Si la informacion para el usuario es null se asigna el string "No hay informacion de este punto"
@@ -880,7 +882,7 @@ function cargarCheckpoint(checkpoint){
             if(confirm("¿Desea registrar este Checkpoint?")){
                 //En caso de continuar. Se le solicita la ubicacion al SO del dispositivo. Esta ubicacion sera utilizada en la funcion callback "ubicacion" explicada atras
                 //La funcion fallo se ejecutara en caso de que no se haya podido obtener la ubicacion del SO. Esta tambien fue explicada atras.
-                navigator.geolocation.getCurrentPosition(ubicacion, fallo, {maximumAge: 10000, timeout: 5000, enableHighAccuracy: true});
+                navigator.geolocation.getCurrentPosition(ubicacion, fallo, {maximumAge: 10000, timeout: 8000, enableHighAccuracy: true});
             }
             
         }
@@ -907,7 +909,7 @@ function listarCheckins(){
         if(intentos_g < 10 && position.coords.accuracy > 350){
             //console.log("Poca presicion en intento "+intentos_g);
             intentos_g++;
-            navigator.geolocation.getCurrentPosition(ubicacion, fallo, {maximumAge: 0, timeout: 5000, enableHighAccuracy: true})
+            navigator.geolocation.getCurrentPosition(ubicacion, fallo, {maximumAge: 0, timeout: 8000, enableHighAccuracy: true})
             return;
             
         }
@@ -937,7 +939,12 @@ function listarCheckins(){
                     if(esta_cerca(checkpoints[j].latitud,checkpoints[j].longitud,position.coords.latitude,position.coords.longitude)){
                         //Si se encuentra cerca empezamos a constrior el HTML a agregar con los datos del arreglo de checkpoints
                         stream = '<li class="checkin" id="checkin-'+checkpoints[j].id+'" ><a href="#">\n';
-                        stream += '<img src="img/no-image.png" />\n';
+                        if(checkpoints[j].checked_in==1){
+                            stream += '<img src="img/check_1.png" />\n';
+                        }
+                        else{
+                            stream += '<img src="img/check_0.png" />\n';
+                        }
                         stream += '<h3>'+checkpoints[j].nombre+'</h3>\n';
                         stream += '<p>'+checkpoints[j].descripcion+'</p>\n';
                         stream += '</a></li>\n'
@@ -972,7 +979,7 @@ function listarCheckins(){
 
     //AQUI INICIA LA ITERACION DE LA FUNCION.
     //Se le solicita la ubicacion al dispositivo pasandole las funciones callback para exito (ubicacion) o error (fallo)
-   navigator.geolocation.getCurrentPosition(ubicacion, fallo, {maximumAge: 0, timeout: 5000, enableHighAccuracy: true});
+   navigator.geolocation.getCurrentPosition(ubicacion, fallo, {maximumAge: 0, timeout: 8000, enableHighAccuracy: true});
    
    //Evento que se ejecuta al presionar el boton regresar
     $('#check-in .regresar').click(function(e){
@@ -1074,7 +1081,7 @@ function geolocalizarMapa(){
         if(intentos_g < 10 && p.coords.accuracy > 350){
             //Si no se obtiene una buena precision se vuelve a solicitar una ubicacion
             intentos_g++;
-            navigator.geolocation.getCurrentPosition(ubicacionExito, ubicacionFallo, {maximumAge: 0, timeout: 5000, enableHighAccuracy: true})
+            navigator.geolocation.getCurrentPosition(ubicacionExito, ubicacionFallo, {maximumAge: 0, timeout: 8000, enableHighAccuracy: true})
             return;
             
         }
@@ -1108,7 +1115,7 @@ function geolocalizarMapa(){
     }
     
     //Llamado a la funcion de geolocolizacion con las funciones correspondientes de fallo y exito
-    navigator.geolocation.getCurrentPosition(ubicacionExito, ubicacionFallo, {maximumAge: 0, timeout: 5000, enableHighAccuracy: true});
+    navigator.geolocation.getCurrentPosition(ubicacionExito, ubicacionFallo, {maximumAge: 0, timeout: 8000, enableHighAccuracy: true});
 }
 
 //Funcion que muestra TODOS los checkpoints del usuario de sesion EN EL MAPA
@@ -1296,6 +1303,205 @@ function cambiarTipoMapa(){
         
         
     }
+    
+}
+
+function cargarConfiguracion(){
+    
+    
+    if(!localStorage.getItem('servidor')){
+        $('#url_serv').val("http://");
+    }
+    else{
+        $('#url_serv').val(localStorage.getItem('servidor'));
+    }
+    
+    if(localStorage.getItem('tipo_mapa')){
+        $('#map_serv').val(localStorage.getItem('tipo_mapa'));
+        $('#map_serv').selectmenu('refresh',true);
+        
+        $('#wms_url').val(localStorage.getItem('wms_url'));
+        $('#wms_layers').val(localStorage.getItem('wms_layers'));
+    }
+    
+    if($('#map_serv option:selected').val()=="wms"){
+        $('#wms_url').textinput('enable');
+        $('#wms_layers').textinput('enable');
+    }
+    
+    var categorias = new Categorias();
+    //Obtenemos el id del usuario
+    var id_usuario = sessionStorage.getItem('user-id');
+    //Listamos las categorias asociados al usuario en sesion
+    categorias.listar(id_usuario, selectCategorias);
+    
+    function selectCategorias(categorias){
+        
+        $('#cat-op').html("");
+        
+        //Aqui se listan las demas categorias
+        for(i=0; i<categorias.length; i++){
+            $('#cat-op').append('<option value="'+categorias[i].id+'">'+categorias[i].nombre+'</option>');
+        }
+        
+        //Se refresca el menu de jquery mobile
+        $('#cat-op').selectmenu('refresh',true);
+        
+        
+        
+    }    
+    
+    $('#servidor .guardar').click(function(e){
+        e.stopImmediatePropagation();
+        if($('#url_serv').val().split("http://")[1]==""){
+            alert("No ha indicado ninguna URL")
+        }
+        else{
+            localStorage.setItem('servidor',$('#url_serv').val());
+            alert("URL guardada con exito")
+        }      
+       return false;
+    });
+    
+    $('#map_serv').change(function(e){
+        e.stopImmediatePropagation();
+        
+        if($('#map_serv option:selected').val()=="wms"){
+            $('#wms_url').textinput('enable');
+            $('#wms_layers').textinput('enable');
+        }
+        else{
+            $('#wms_url').textinput('disable');
+            $('#wms_layers').textinput('disable');
+        }
+        
+        
+    });
+    
+    $('#mapas-conf .guardar').click(function(e){
+        e.stopImmediatePropagation();
+        
+        if($('#map_serv option:selected').val()=="wms"){
+            if($('#wms_url').val()==""){
+                alert("Debe indicar una URL para la fuente de mapa WMS");
+                return false;
+            }
+            if($('#wms_layers').val()==""){
+                alert("Debe indicar  parametros de capas para el mapa WMS");
+                return false;
+            }
+            
+            localStorage.setItem('tipo_mapa',"wms");
+            localStorage.setItem('wms_url',$('#wms_url').val());
+            localStorage.setItem('wms_layers',$('#wms_layers').val());
+            alert("Servicio de Mapas cambiado con exito");
+            
+        }
+        else{
+            localStorage.setItem('tipo_mapa',$('#map_serv option:selected').val());
+            alert("Servicio de Mapas cambiado con exito");
+        }
+             
+       return false;
+    });
+    
+    $('#nueva-pass .guardar').click(function(e){
+        e.stopImmediatePropagation();
+        
+        if($('#pass_input').val().length<6 || $('#pass_input').val().length>12){
+            alert("La contraseña tiene que tener 6 caracteres minimo y 12 maximo");
+            return false;
+        }
+        if($('#pass_input').val()!=$('#pass_conf').val()){
+            alert("No coinciden las contraseñas ingresadas");
+            return false;
+        }
+        
+        user_id = sessionStorage.getItem('user-id');
+        new_pass = md5($('#pass_input').val());
+        
+        var query = "UPDATE usuarios SET pass='"+new_pass+"' WHERE id="+user_id;
+        
+              
+        db.transaction(function(tx){
+            tx.executeSql(query);
+            alert("Contraseña cambiada con exito")
+            $('#pass_input').val("");
+            $('#pass_conf').val("");
+        })
+        
+        return false;
+
+    });
+    
+    $('#cat-conf .modificar').click(function(e){
+        
+        e.stopImmediatePropagation();
+        
+        $('#modificar-categoria').popup();
+        $('#modificar-categoria').popup("open");
+
+        c = new Categorias();
+        c.consultar($('#cat-op option:selected').val(),function(categoria){
+            $('#nombre_cat2').val(categoria.nombre);
+            $('#descripcion_cat2').val(categoria.descripcion);
+            $('#id_cat').val(categoria.id);
+        });
+        
+        return false;
+        
+        
+    });
+    
+    $('#modificar-categoria form').submit(function(e){
+        e.stopImmediatePropagation(); //evitamos propagacion
+        //Guardamos los datos del formulario en variables. No es necesario validar su existencia o tamaña, ya que el codigo html se encarga de ello (atributos required y maxlength)
+        var nombre=$('#nombre_cat2').val();
+        var descripcion=$('#descripcion_cat2').val();
+        
+        if(nombre==""){
+            alert("Tiene que indicar un nombre de categoría")
+            return false;
+        }
+        
+        
+        //Creamos la categoria en la Base de datos. La variable de sincronizado esta en 0 (de falso) y la de servidor_id en null ya que todavia no se ha sincronizado con el servidor
+        var c = new Categorias();
+        c.consultar($('#cat-op option:selected').val(),function(categoria){
+            categoria.nombre=nombre;
+            categoria.descripcion=descripcion;
+            
+            categoria.actualizar();
+            c.listar(id_usuario, selectCategorias);
+        });
+        
+        //Cerramos el popup e indicamos el mensaje de categoria creada con exito al usuario
+        $('#modificar-categoria').popup();
+        $('#modificar-categoria').popup("close");
+        
+        alert("La categoría ha sido modificada");
+        return false; 
+    });
+    
+    
+    
+    $('#cat-conf .borrar').click(function(e){
+            
+        e.stopImmediatePropagation();
+
+        if(confirm("¿Esta seguro de querer borrar esta categoría?\nLos sitios asociados a ella quedaran sin categoría")){
+            var c = new Categorias();
+            c.consultar($('#cat-op option:selected').val(),function(categoria){
+                categoria.borrar();
+                c.listar(id_usuario, selectCategorias);
+            });
+            alert("La categoría ha sido eliminada");
+        }
+
+        return false;
+            
+            
+    });
     
     
     

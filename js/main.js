@@ -5,9 +5,9 @@
 
 
 var db = openDatabase('georef', '1.0', 'GeoRef Local DB', 2 * 1024 * 1024);
-localStorage.setItem('tipo_mapa',"osm");
-localStorage.setItem('wms_url',"http://129.206.228.72/cached/osm?");
-localStorage.setItem('wms_layers',"osm_auto:all");
+//localStorage.setItem('tipo_mapa',"google");
+//localStorage.setItem('wms_url',"http://129.206.228.72/cached/osm?");
+//localStorage.setItem('wms_layers',"osm_auto:all");
 function init_db(){
     
    
@@ -150,6 +150,10 @@ function mapaInicial(){
         //Establecemos como mapa base inicial al mapa Hibrido
         map.setBaseLayer(ghyb);
         //Agregamos las opciones al select para que el usuario pueda cambiar el tipo de mapa cuando lo prefiera
+        
+        
+       
+        
         $('#select-mapa').html("");
         $('#select-mapa').append('<option value="1">Hibrido</option>');
         $('#select-mapa').append('<option value="2">Urbano</option>');
@@ -161,7 +165,8 @@ function mapaInicial(){
     //En caso de utilizar bing creamos las layers correspondientes para el mapa hibrido, urbano o satelite (igual que con google)
     else if(localStorage.getItem('tipo_mapa')=="bing"){
         //Esta es la key obtenida en la pag de microsoft
-        apiKey = "AqTGBsziZHIJYYxgivLBf0hVdrAk9mWO5cQcb8Yux8sW5M8c8opEC2lZqKR1ZZXf";
+        
+        apiKey = "AoRzSTChvLwCmKUPQGSghsYjVaMyPLjxT5W85zMiWsOfx10HljbVgfSOfF-7B1qj";
         
         var hybrid = new OpenLayers.Layer.Bing({
                 name: "Hybrid",
@@ -181,10 +186,10 @@ function mapaInicial(){
         });
         //Agregamos las capas al objeto map de openlayers
         map.addLayers([hybrid,road,aerial]);
-        /* NOTA IMPORTANTE: Aqui deberia haber un setBaseLayer con una de las capas de Bing, sin embargo por una extraña razon causa error en la app (solo con Bing
-           Se agrega al final, despues que todos los scripts y listeners han sido cargados para que no de problemas */
+        map.setBaseLayer(map.layers[1]);
+        
         //Ocultamos las etiquetas de informacion de Bing para que no interfieran con los controles de Zoom de la app       
-        $('#OpenLayers_Control_Attribution_10').hide();  
+        $('.olControlAttribution').hide();  
         //Agregamos las opciones al select para que el usuario pueda cambiar el tipo de mapa cuando lo prefiera
         $('#select-mapa').html("");
         $('#select-mapa').append('<option value="1">Hibrido</option>');

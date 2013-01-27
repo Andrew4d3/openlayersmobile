@@ -20,14 +20,16 @@ GeoRef 0.0.1
 Thesis Project of Andrew Davis Escalona.
 
 
-My name is Andrew Davis and right now I find myself working in what would be my thesis in Computer Science from the UCV (Venezuela). The code you can find over here belongs to what  will be the mobile app I'm planning to develop. It is about a mobile app that will be useful to georeference "places of interest" for the user. What  just simply means: if I am at a place and I want to save my current location, I just log on the app and add that place. I can also add important information as description, datetime and posibly -but not sure- a picture from the place. This app will also be able to "check-in" places called "checkpoints" which will be dowloaded from a server.
+My name is Andrew Davis and right now I am working in my thesis in Computer Science of the UCV (Venezuela). The code you can find  here belongs to what  will be the mobile app I'm planning to develop. This app will be useful to georeference "places of interest" for the user. What  just simply means: if I am in a place and I want to save my current location, I just log on the app and add that place in it. You can also add important information, like description, and datetime. Also this app will be able to "check-in" places called "checkpoints" which will be dowloaded from a server.
 
 What is this useful for?
 
-This is a purpose general app. I don't intend to compete with Foursquare or Lattitude. This app can be used to keep a "History" or clasification of places I have visited. Let us assume someone is doing a "Field work" in a forest, park or any other places. This person could save the places where he or she has developed important activities or collected important samples. Then, these places can be uploaded to a server and be checked afterwards by a supervisor, manager or even the person that performed the activities at the beginning. In another way, The manager or supervisor cand add "checkpoints" to be inteded to visit by a group of... let's say "deliverers". These deliverers can check on the app the places to go, so that they can move to those places using maps in a fast and efficient way.
+This is a purpose general app. I don't intend to compete with Foursquare or Lattitude. This app can be used to keep a "History" or clasification of places that I have visited. For example, Let us say someone is doing a "Field work" in a forest, park or any another place. This person might save the places where he or she has developed important activities or collected important samples. Then, these places can be uploaded to a server (into a central database) and be checked afterwards by a supervisor, manager or even the person that performed the activities at the beginning. In other way, The manager or supervisor cand add "checkpoints" to be visited by a group of... let's say "deliverers". These deliverers can verify  on the app the places to go, so that they can shift to those places using maps in a fast and efficient way.
 
-This an open source project and any suggestion or comment is totally welcome. Feel free to give me your advices.
+This is an open source project and any suggestion or comment is totally welcome. Feel free to give me your advices.
 
 Kind Regards!
+
+email: andrew4d3@gmail.com
 
 PS: Sorry for my bad english. I did my best without using Google translator.

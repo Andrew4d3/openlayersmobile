@@ -21,12 +21,18 @@ and open the template in the editor.
                 background-color: #ddd;
                 font-weight: bold;
             }
+            
+            #home{height: 100% !important; position:relative !important;}
+            #home [data-role=footer]{bottom:0; position:absolute !important; top: auto !important; width:100%;} 
         </style>
         <script>
             document.addEventListener("deviceready", onDeviceReady, false);
            
             function onDeviceReady(){
                 init_db();
+                
+                
+                $.mobile.defaultPageTransition = 'none';
                 if(sessionStorage.getItem('user')===""){
                     location.href="index.html";
                     //$.mobile.changePage('index.html');
@@ -75,6 +81,8 @@ and open the template in the editor.
                      
                      $('#alertas').live('pagebeforeshow',listarAlertas);
                      
+                    $('#configuracion').live('pagebeforeshow',cargarConfiguracion);
+                     
                      
                     $("#cerrar").click(function(e){
                         e.stopImmediatePropagation();
@@ -103,7 +111,7 @@ and open the template in the editor.
         <div data-role="header">
             <a href="#" id="cerrar" data-icon="delete">Cerrar Sesión</a>
             <h1></h1>
-            <a href="#" data-icon="check">Configuración</a>
+            <a href="#configuracion" data-icon="gear">Configuración</a>
         </div>
 
         <ul data-role="listview">
@@ -115,7 +123,29 @@ and open the template in the editor.
             <li><a href="#" >Sincronizar</a></li>
             <li><a href="#alertas">Alertas</a></li>
 
-        </ul> 
+        </ul>
+        
+        <div data-role="footer">
+            <a href="#acercade" data-rel="popup" >Acerca de GeoRef</a>
+            
+        </div>
+        
+        <div  id="acercade" data-role="popup" data-position-to="window">
+            <div data-role="header">
+            
+                <h1>Acerca de<br /> GeoRef</h1>
+                <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            </div>
+            <p style="text-align:center">
+                
+                Esta es una aplicación movil desarrollada para el cumplimiento del objetivo del TEG de Andrew Davis Escalona en la Universidad Central de Venezuela.<br />
+                <strong>Correo Electronico</strong><br /> andrew4d3@gmail.com<br />
+                <strong>Tutor Academico</strong><br /> Antonio Leal.<br /><br />
+                Caracas-Venezuela<br /> Año 2013
+                
+            </p>
+            
+        </div>
    
     </div>
     
@@ -180,8 +210,8 @@ and open the template in the editor.
         
         <form id="sitio_form" style="margin-top: 10px">
             <div data-role="fieldcontain">
-                <label for="basic">Nombre:</label><input  type="text" maxlength="20" name="nombre" id="nombre" data-mini="true" placeholder="Campo requerido" title="El sitio a crear tiene que tener un nombre que lo identifique"/>
-                <label for="basic">Descripcion:</label><input type="text" maxlength="600" name="descripcion" id="descripcion" data-mini="true" placeholder="Campo opcional"/>
+                <label for="nombre">Nombre:</label><input  type="text" maxlength="20" name="nombre" id="nombre" data-mini="true" placeholder="Campo requerido" title="El sitio a crear tiene que tener un nombre que lo identifique"/>
+                <label for="descripcion">Descripcion:</label><input type="text" maxlength="600" name="descripcion" id="descripcion" data-mini="true" placeholder="Campo opcional"/>
             
                 <label for="opciones-categorias" class="select">Categoria:</label>
                 <select name="opciones-categorias" id="opciones-categorias">
@@ -189,8 +219,7 @@ and open the template in the editor.
                     <option value="new">Otra (Crear categoría)</option>
                 </select>
             
-                <label for="basic">Fotografía (Opcional):</label>
-                <a href="#" data-role="button" data-icon="star" data-mini="true" data-inline="true">Abrir Camara</a>
+                
             
             </div>
             <input type="submit" value="Crear Sitio">
@@ -202,8 +231,8 @@ and open the template in the editor.
             </div>
             <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
             <form style="margin:10px">
-                <label for="basic">Nombre de categoría:</label><input  type="text" name="nombre" id="nombre_cat" data-mini="true" placeholder="Requerido" title="Un nombre para la categoría es requerido" maxlength="20"/>
-                <label for="basic">Descripción de categoría:</label><input type="text" name="descripcion_cat" id="descripcion_cat" data-mini="true" placeholder="Opcional" maxlength="100"/>
+                <label for="nombre_cat">Nombre de categoría:</label><input  type="text" name="nombre" id="nombre_cat" data-mini="true" placeholder="Requerido" title="Un nombre para la categoría es requerido" maxlength="20"/>
+                <label for="descripcion_cat">Descripción de categoría:</label><input type="text" name="descripcion_cat" id="descripcion_cat" data-mini="true" placeholder="Opcional" maxlength="100"/>
                 <input type="submit" value="Crear Categoria">
             </form>
         </div>
@@ -248,8 +277,6 @@ and open the template in the editor.
                     <dd id="sitio-descripcion">I'm the definition text</dd>
                     <dt>Categoria</dt>
                     <dd id="sitio-categoria">I'm the definition text</dd>
-                    <dt>Imagen</dt>
-                    <dd id="sitio-imagen">I'm the definition text</dd>
                     <dt>Mini-Mapa</dt>
                     <dd id="sitio-mapa">I'm the definition text</dd>
                     
@@ -308,8 +335,6 @@ and open the template in the editor.
                     <dd id="checkpoint-status">I'm the definition text</dd>
                     <dt>Informacion para el usuario</dt>
                     <dd id="checkpoint-info">I'm the definition text</dd>
-                    <dt>Imagen</dt>
-                    <dd id="checkpoint-imagen">I'm the definition text</dd>
                     <dt>Mini-Mapa</dt>
                     <dd id="checkpoint-mapa">I'm the definition text</dd>
                     
@@ -339,6 +364,73 @@ and open the template in the editor.
                 
             
             </ul>
+            
+        </div>
+        
+        <div data-role="page" id="configuracion">
+            <div data-role="header">
+                <a href="#home" class="regresar" data-icon="back">Regresar</a>
+                <h1>Configuración</h1>
+            </div>
+            <div data-role="collapsible-set">
+                <div data-role="collapsible" id="nueva-pass">  
+                    <h3>Nueva Contraseña</h3>
+
+                    <label for="pass_input">Contraseña:</label>
+                    <input id="pass_input" placeholder="6 caracteres mínimo 12 máximo" value="" type="password">
+                    <label for="pass_conf">Repita Contraseña:</label>
+                    <input id="pass_conf" placeholder="" value="" type="password">
+                    <a href="#" class="guardar" data-role="button">Guardar Nueva Contraseña</a>
+                </div>
+                
+                <div data-role="collapsible" id="mapas-conf"> 
+                    <h3>Servicio de Mapas</h3>
+
+                    <label for="map_serv">Mapas:</label>
+                    <select id="map_serv">
+                        <option value="osm">OpenStreet Maps (por defecto)</option>
+                        <option value="google">Google Maps</option>
+                        <option value="bing">Bing Maps</option>
+                        <option value="wms">WMS</option>
+                    </select>
+                    <label for="wms_url" >URL del WMS</label>
+                    <input type="text" id="wms_url"  disabled >
+                    <label for="wms_layers">Capas del WMS</label>
+                    <input type="text" id="wms_layers"  disabled >
+                    <a href="#" class="guardar" data-role="button">Cambiar Servicio de Mapas</a>
+                </div>
+                <div data-role="collapsible" id="servidor"> 
+                    <h3>Servidor de Sincronizacion</h3>
+
+                    <label for="url_serv">URL del servidor</label>       
+                    <input type="text" id="url_serv" >
+                    <a href="#" class="guardar" data-role="button">Guardar URL</a>
+                </div>
+                <div data-role="collapsible" id="cat-conf"> 
+                    <h3>Opciones de Categoría</h3>
+                    <label for="cat-op">Categorias Guardadas:</label> 
+                    <select id="cat-op">
+                        
+                    </select>
+                    <a href="#" class="modificar" data-role="button" data-inline="true">Modificar</a>
+                    <a href="#" class="borrar" data-role="button" data-inline="true">Borrar</a>
+                </div>
+                
+            </div>
+            
+            <div  id="modificar-categoria" data-role="popup">
+                <div data-role="header">
+                    <h5>Editar <br/>Categoría</h5>
+                </div>
+                <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+                <form style="margin:10px">
+                    <label for="nombre_cat2">Nombre de categoría:</label><input  type="text" name="nombre" id="nombre_cat2" data-mini="true" placeholder="Requerido" title="Un nombre para la categoría es requerido" maxlength="20"/>
+                    <label for="descripcion_cat2">Descripción de categoría:</label><input type="text" name="descripcion_cat2" id="descripcion_cat2" data-mini="true" placeholder="Opcional" maxlength="100"/>
+                    
+                    <input type="submit" value="Guardar Cambios">
+                </form>
+            </div>
+                                             
             
         </div>
     

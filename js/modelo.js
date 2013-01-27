@@ -319,10 +319,9 @@ function categoria (id, id_usuario, nombre, descripcion, sincronizado, servidor_
    
     this.actualizar = function() {
         
-        //El usuario solo esta permitido a modificar las variables visto y sincronizado
-        var query = "UPDATE alertas SET visto="+this.visto+", "+"sincronizado="+this.sincronizado+" WHERE id="+this.id;
-        //console.log(query);
-        return;
+        
+        var query = "UPDATE categorias SET nombre='"+this.nombre+"', "+"descripcion='"+this.descripcion+"' WHERE id="+this.id;
+        
         db.transaction(function(tx){
             tx.executeSql(query);
         })
@@ -330,12 +329,16 @@ function categoria (id, id_usuario, nombre, descripcion, sincronizado, servidor_
     
     this.borrar = function() {
         
+        var query1 = "UPDATE sitios SET id_categoria=null WHERE id_categoria="+this.id;
+        var query2 = "DELETE FROM categorias WHERE id="+this.id;
         
-        var query = "DELETE FROM alertas WHERE id="+this.id;
-        return;
-        //console.log(query);
+        //console.log(query1);
+        //console.log(query2);
+        
+        
         db.transaction(function(tx){
-            tx.executeSql(query);
+            tx.executeSql(query1);
+            tx.executeSql(query2);
         })
     };
     
