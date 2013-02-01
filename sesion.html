@@ -69,11 +69,11 @@ and open the template in the editor.
                     
 
                     user=sessionStorage.getItem('user');
-                 
                     
-                    $('#nuevo_sitio').live('pagebeforeshow',nuevoSitio);
                     
-                    $('#check-in').live('pagebeforeshow',listarCheckins);
+                    $('#nuevo_sitio').live('pageshow',nuevoSitio);
+                    
+                    $('#check-in').live('pageshow',listarCheckins);
                     
                     $('#sitios').live('pagebeforeshow',listarSitios);
                     
@@ -116,7 +116,7 @@ and open the template in the editor.
 
         <ul data-role="listview">
             <li><a href="#nuevo_sitio">Nuevo Sitio</a></li>
-            <li><a data-ajax="false" href="map.html#mappage">Mapa</a>
+            <li><a data-ajax="false" href="map.html#mappage" onclick="$.mobile.showPageLoadingMsg()">Mapa</a>
             <li><a href="#check-in">Hacer Check-in</a></li>
             <li><a href="#sitios">Sitios</a></li>
             <li><a href="#checkpoints">Checkpoints</a></li>
@@ -287,7 +287,7 @@ and open the template in the editor.
                 <div data-role="navbar"  data-iconpos="right">
                     <ul>
                         <li><a class="editar" href="#" >Editar</a></li>
-                        <li><a href="map.html" data-ajax="false" class="irmapa">Ver en Mapa</a></li>
+                        <li><a href="map.html" data-ajax="false" class="irmapa" onclick="$.mobile.showPageLoadingMsg()">Ver en Mapa</a></li>
                         <li><a class="borrar" href="#" >Borrar</a></li>
                     </ul>
                 </div>
@@ -345,7 +345,7 @@ and open the template in the editor.
                 <div data-role="navbar"  data-iconpos="right">
                     <ul>
                         <li><a class="check-in" href="#" >Hacer Check-in</a></li>
-                        <li><a href="map.html" data-ajax="false" class="irmapa">Ver en Mapa</a></li>
+                        <li><a href="map.html" data-ajax="false" class="irmapa" onclick="$.mobile.showPageLoadingMsg()">Ver en Mapa</a></li>
                         
                     </ul>
                 </div>

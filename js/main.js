@@ -150,7 +150,7 @@ function mapaInicial(){
         //Establecemos como mapa base inicial al mapa Hibrido
         map.setBaseLayer(ghyb);
         //Agregamos las opciones al select para que el usuario pueda cambiar el tipo de mapa cuando lo prefiera
-        
+        $('a[title="Haz clic para visualizar esta zona en Google Maps"]').remove();
         
        
         

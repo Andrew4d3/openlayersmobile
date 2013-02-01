@@ -79,7 +79,7 @@ function listarAlertas(){
 
 function nuevoSitio(){
     
-    var intentos_g = 1;
+    
     
     //Se desactivan los eventos pertinentes para evitar problemas de propagacion y no consistencia de datos
     $('#nuevo_sitio .continuar').unbind('click');
@@ -92,29 +92,14 @@ function nuevoSitio(){
     //Esta funcion callback se ejecutara si la aplicacion movil pudo obtener los datos de geolocalizacion (latitud, longitud, etc...)
     var onSuccess = function(position) {
         //Se le notifica al usuario que los datos fueron obtenidos con exito
-        
-        if(intentos_g < 10 && position.coords.accuracy > 350){
-            //console.log("Poca presicion en intento "+intentos_g);
-            intentos_g++;
-            navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 0, timeout: 8000, enableHighAccuracy: true})
-            return;
-            
-        }
-        else if(intentos_g==10){
-            stream = "<p style='color:red;'>No se ha podido obtener una ubicación precisa. Busque una ubicación (preferiblemente con vista al cielo) y active el GPS y/o Wifi de su dispositivo<br />\n";
-            stream +="Precision:"+position.coords.accuracy+" metros</p>"
-            $('#datos-coordenadas').html(stream);
-            return;
-        }
-        
-        
+     
         
         alert("Posicion obtenida con exito");
         //Se guardan los datos en variables globales de alcance dentro de la funcion
         var latitud = position.coords.latitude;
         var longitud = position.coords.longitude;
         var presicion = position.coords.accuracy;
-        console.log(new Date(position.timestamp));
+        //console.log(new Date(position.timestamp));
         var o_fecha = new Date(position.timestamp );
         var fecha = formatearFecha(o_fecha); //Formateamos la fecha y hora en el formato deseado
 
@@ -146,10 +131,18 @@ function nuevoSitio(){
 
     //Si por alguna razon no se pudieron obtener los datos de la ubicacion se ejecutara esta funcion callback
     function onError(error) {
+        var mensaje;
+        if(error[0]=="precision"){
+            mensaje="La ubicación obtenida es muy poco precisa; "+error[1]+" metros.";
+        }
+        else if(error=="timeout"){
+            mensaje="TIMEOUT";
+        }
+
 
         //Se construye el mensaje con su error correspondiente
         stream = "<p style='color:red;'>No se ha podido obtener su ubicacion actual. Intentelo mas tarde.<br />\n";
-        stream += "ERROR: "+error.message+"</p>";
+        stream += "ERROR: "+mensaje+"</p>";
         //Se imprime el mensaje en el HTML
         $('#datos-coordenadas').html(stream);
         //Se oculta el footer para que el usuario no pueda ejecutar ninguna accion de crear sitios en sus botones
@@ -160,7 +153,8 @@ function nuevoSitio(){
     }
     //Aqui se hace la llamada para obtner los datos de geolocalizacion, se le pasa como argumenta las funciones callback de exito y fallo explicadas anteriormente.
     //Esta accion es la que se ejecuta despues de ocultar el footer
-    navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 0, timeout: 8000, enableHighAccuracy: true})
+    //navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 0, timeout: 8000, enableHighAccuracy: true});
+    obtenerPosicion(onSuccess, onError);
 
     //Si se da al boton regresar, se regresa a la pantalla de inicio y se ejecuta esta funcion
     $('#nuevo_sitio .regresar').click(function(){
@@ -177,7 +171,7 @@ function nuevoSitio(){
         //Se desactuva el evento de continuar, ya que este sera iniciado nuevamente en la funcion de exito de la llamada a geolocalizacion, y asi se evita la propagacion innecesaria
         $('#nuevo_sitio .continuar').unbind('click');
         //Se hace la misma llamada de geolocalizacion con sus respectivas funciones callback de fallo y exito
-        navigator.geolocation.getCurrentPosition(onSuccess, onError, {maximumAge: 0, timeout: 8000, enableHighAccuracy: true});
+        obtenerPosicion(onSuccess, onError);
 
     });
                     
@@ -872,7 +866,12 @@ function cargarCheckpoint(checkpoint){
         }
         //Funcion que se ejecutara si no se pudo recuperar la ubicacion del API del SO del dispositivo
         function fallo(){
-            alert("No se pudo obtener su ubicación.\nAsegurese de tener GPS y/o Wi-fi activado e intentelo de nuevo");
+            if(error[0]=="precision"){
+                alert("La ubicación obtenida es muy poco precisa; "+error[1]+" metros.");
+            }
+            else if(error=="timeout"){
+                alert("No fue posible obtener su ubicación actual\nAsegurese de tener GPS y/o Wifi activado");
+            }
         }
         
         //A PARTIR DE ESTA INSTRUCCION EMPIEZA LA FUNCION.
@@ -882,7 +881,7 @@ function cargarCheckpoint(checkpoint){
             if(confirm("¿Desea registrar este Checkpoint?")){
                 //En caso de continuar. Se le solicita la ubicacion al SO del dispositivo. Esta ubicacion sera utilizada en la funcion callback "ubicacion" explicada atras
                 //La funcion fallo se ejecutara en caso de que no se haya podido obtener la ubicacion del SO. Esta tambien fue explicada atras.
-                navigator.geolocation.getCurrentPosition(ubicacion, fallo, {maximumAge: 10000, timeout: 8000, enableHighAccuracy: true});
+                obtenerPosicion(ubicacion, fallo);
             }
             
         }
@@ -901,24 +900,11 @@ function cargarCheckpoint(checkpoint){
 //Funcion que lista los puntos para hacer checkin. Que no son mas que los checkpoints cercanos a la posicion del usuario
 function listarCheckins(){
     
-    var intentos_g = 1;
+   
     $('#lista-check-in').html("");//Se reinicia el HTML de los checkins
    //Funcion que se realizara si se llego a obtener la ubicacion a traves del API del SO del dispositivo
    function ubicacion(position){
-       
-        if(intentos_g < 10 && position.coords.accuracy > 350){
-            //console.log("Poca presicion en intento "+intentos_g);
-            intentos_g++;
-            navigator.geolocation.getCurrentPosition(ubicacion, fallo, {maximumAge: 0, timeout: 8000, enableHighAccuracy: true})
-            return;
-            
-        }
-        else if(intentos_g==10){
-            alert("No se ha podido obtener una ubicación precisa. Busque una ubicación (preferiblemente con vista al cielo) y active el GPS y/o Wifi de su dispositivo");
-            
-            return;
-        }
-       
+      
        
         alert("Ubicacion obtenida con exito");
         //Se cambia a la pagina donde se listaran los checkpoints cercanos
@@ -972,14 +958,20 @@ function listarCheckins(){
        
    }
    //Funcion callback que se ejecuta si no se pudo conseguir la ubicacion del dispositivo
-   function fallo(){
-       alert("No se pudo obtener su ubicación.\nAsegurese de tener GPS y/o Wi-fi activado e intentelo de nuevo");
+   function fallo(error){
+       if(error[0]=="precision"){
+            alert("La ubicación obtenida es muy poco precisa; "+error[1]+" metros.");
+        }
+        else if(error=="timeout"){
+            alert("No fue posible obtener su ubicación actual\nAsegurese de tener GPS y/o Wifi activado");
+        }
        
    }
 
     //AQUI INICIA LA ITERACION DE LA FUNCION.
     //Se le solicita la ubicacion al dispositivo pasandole las funciones callback para exito (ubicacion) o error (fallo)
-   navigator.geolocation.getCurrentPosition(ubicacion, fallo, {maximumAge: 0, timeout: 8000, enableHighAccuracy: true});
+   //navigator.geolocation.getCurrentPosition(ubicacion, fallo, {maximumAge: 0, timeout: 8000, enableHighAccuracy: true});
+   obtenerPosicion(ubicacion, fallo);
    
    //Evento que se ejecuta al presionar el boton regresar
     $('#check-in .regresar').click(function(e){
@@ -1075,21 +1067,10 @@ function sitioValido(){
 //Funcion para indicar la ubicacion actual del usuario en el mapa
 function geolocalizarMapa(){
     //Intentos de geolocalizacion en caso de que no se haya obtenido una buena precision
-    var intentos_g = 1;
+    
     
     function ubicacionExito(p){
-        if(intentos_g < 10 && p.coords.accuracy > 350){
-            //Si no se obtiene una buena precision se vuelve a solicitar una ubicacion
-            intentos_g++;
-            navigator.geolocation.getCurrentPosition(ubicacionExito, ubicacionFallo, {maximumAge: 0, timeout: 8000, enableHighAccuracy: true})
-            return;
-            
-        }
-        else if(intentos_g==10){
-            //Si despues de 10 intentos no se ha podido obtener una posicion con buena presicion se le indica al usuario
-            alert("No se pudo obtener una ubicacion precisa");
-            return;
-        }
+        
         
         //Si se llega aqui es porque se pudo obtener una ubicacion con buena precision y se procede a crear el objeto de coordenadas
         coord_p = new OpenLayers.LonLat(p.coords.longitude,p.coords.latitude);
@@ -1110,12 +1091,17 @@ function geolocalizarMapa(){
     }
     
     //Funcion de fallo
-    function ubicacionFallo(){
-        alert("No se pudo obtener la ubicacion\nAsegurese de tener GPS y/o Wifi activado");
+    function ubicacionFallo(error){
+        if(error[0]=="precision"){
+            alert("La ubicación obtenida es muy poco precisa; "+error[1]+" metros.");
+        }
+        else if(error=="timeout"){
+            alert("No fue posible obtener su ubicación actual\nAsegurese de tener GPS y/o Wifi activado");
+        }
     }
     
     //Llamado a la funcion de geolocolizacion con las funciones correspondientes de fallo y exito
-    navigator.geolocation.getCurrentPosition(ubicacionExito, ubicacionFallo, {maximumAge: 0, timeout: 8000, enableHighAccuracy: true});
+    obtenerPosicion(ubicacionExito, ubicacionFallo);
 }
 
 //Funcion que muestra TODOS los checkpoints del usuario de sesion EN EL MAPA
@@ -1503,6 +1489,63 @@ function cargarConfiguracion(){
             
     });
     
+    
+    
+}
+
+
+
+function obtenerPosicion(exito,fallo){
+    $.mobile.showPageLoadingMsg();
+    var segundo = 0;
+    
+    var timeout = false;
+    var p;
+    
+    function onSuccess(position){
+        p =  position;
+        
+        if(segundo>4 && position.coords.accuracy<350){
+            
+            
+            timeout=false;
+            clearInterval(contador);
+            navigator.geolocation.clearWatch(watchID);
+            $.mobile.hidePageLoadingMsg();
+            exito(position);
+            
+        }
+        
+    }
+    
+    function onError(error){
+        timeout = true;
+        $.mobile.hidePageLoadingMsg();
+        fallo("timeout");
+        
+        
+    }
+    
+    
+    var watchID = navigator.geolocation.watchPosition(onSuccess, onError, {maximumAge: 0, timeout: 15000, enableHighAccuracy: true});
+    
+    var contador = setInterval(function(){
+        segundo++;
+        console.log(segundo);
+        if(segundo==15){
+            clearInterval(contador);
+            navigator.geolocation.clearWatch(watchID);
+            if(p.coords.accuracy>=350 && !timeout){
+                error = ["precision",p.coords.accuracy];
+                $.mobile.hidePageLoadingMsg();
+                fallo(error);
+            }
+            else if(p.coords.accuracy<350){
+                $.mobile.hidePageLoadingMsg();
+                exito(p);
+            }
+        }
+    },1000);
     
     
 }
