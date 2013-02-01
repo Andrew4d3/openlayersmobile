@@ -10,11 +10,13 @@
     <name>GeoRef</name>
 
     <description>
-        Un Beta de la aplicacion Georef 
+        Aplicacion movil que utiliza las facultades de OpenLayers combinadas con jQuery Mobile y Phonegap.
     </description>
 
     <author href="https://andev.260mb.org" email="andrew4d3@gmail.com">
         Andrew Davis
     </author>
+	
+	<icon src="icon.png" />
 
 </widget>
