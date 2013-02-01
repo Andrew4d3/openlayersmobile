@@ -3,7 +3,7 @@
         xmlns:gap = "http://phonegap.com/ns/1.0"
         id        = "com.ucv.georef"
         versionCode="10" 
-        version   = "0.1.0">
+        version   = "1.0.0">
 
     <!-- versionCode is optional and Android only -->
 
@@ -16,7 +16,9 @@
     <author href="https://andev.260mb.org" email="andrew4d3@gmail.com">
         Andrew Davis
     </author>
-	
-	<icon src="icon.png" />
-
+    
+    <preference name="phonegap-version" value="2.2.0" />
+    
+    <icon src="icon.png" />
+    
 </widget>
