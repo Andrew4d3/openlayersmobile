@@ -33,6 +33,8 @@ and open the template in the editor.
                 
                 
                 $.mobile.defaultPageTransition = 'none';
+                $.support.cors = true;
+                $.mobile.allowCrossDomainPages = true;
                 if(sessionStorage.getItem('user')===""){
                     location.href="index.html";
                     //$.mobile.changePage('index.html');
@@ -94,6 +96,13 @@ and open the template in the editor.
                         
                     });
                     
+                     $("#sincronizar").click(function(e){
+                        e.stopImmediatePropagation();
+
+                        Sincronizar();
+                        
+                    });
+                    
                    
 
 
@@ -120,7 +129,7 @@ and open the template in the editor.
             <li><a href="#check-in">Hacer Check-in</a></li>
             <li><a href="#sitios">Sitios</a></li>
             <li><a href="#checkpoints">Checkpoints</a></li>
-            <li><a href="#" >Sincronizar</a></li>
+            <li><a href="#" id="sincronizar">Sincronizar</a></li>
             <li><a href="#alertas">Alertas</a></li>
 
         </ul>

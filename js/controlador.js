@@ -42,6 +42,7 @@ function listarAlertas(){
             else{
 
                 alertas[posicion].visto=1;
+                alertas[posicion].sincronizado=0;
                 alertas[posicion].actualizar();
                 //console.log("actualizado");
                 return;
@@ -492,6 +493,28 @@ function cargarSitio(sitio){
         //Si el usuario si quiere borrarlo...
         if(borrar){
             //...llamamos al metodo de borrar del sitio en cuestion
+            usuario_s = sessionStorage.getItem('user');
+            if(sitio.servidor_id!=null){
+            	
+        		if(localStorage.getItem(usuario_s+'_sitborrados')){
+        			
+					sitborrados=JSON.parse(localStorage.getItem(usuario_s+'_sitborrados'));
+					sitborrados.push(sitio.servidor_id);
+					localStorage.setItem(usuario_s+'_sitborrados',JSON.stringify(sitborrados));
+					
+					
+					
+				}
+				else{
+					sitborrados=[];
+					sitborrados[0] = sitio.servidor_id;
+					localStorage.setItem(usuario_s+'_sitborrados',JSON.stringify(sitborrados));
+					
+					
+				}
+        	}
+            
+            
             sitio.borrar();      
 
 
@@ -644,8 +667,9 @@ function editarSitio(sitio){
         else{
             sitio.id_categoria = $('#opciones-categorias option:selected').val();
         }
-        
+        sitio.sincronizado=0;
         //Llamamos al metodo actualizar del objeto sitio. Que actualizara los atributos actuales de este objeto a la BD local
+        
         sitio.actualizar();
 
         //Notificamos al usuario del exito de la modificacion del nuevo sitio
@@ -1456,6 +1480,7 @@ function cargarConfiguracion(){
         c.consultar($('#cat-op option:selected').val(),function(categoria){
             categoria.nombre=nombre;
             categoria.descripcion=descripcion;
+            categoria.sincronizado=0;
             
             categoria.actualizar();
             c.listar(id_usuario, selectCategorias);
@@ -1478,6 +1503,29 @@ function cargarConfiguracion(){
         if(confirm("¿Esta seguro de querer borrar esta categoría?\nLos sitios asociados a ella quedaran sin categoría")){
             var c = new Categorias();
             c.consultar($('#cat-op option:selected').val(),function(categoria){
+            	
+            	usuario_s = sessionStorage.getItem('user');
+            	
+            	if(categoria.servidor_id!=null){
+            		if(localStorage.getItem(usuario_s+'_catborradas')){
+						catborradas=JSON.parse(localStorage.getItem(usuario_s+'_catborradas'));
+						catborradas.push(categoria.servidor_id);
+						
+						localStorage.setItem(usuario_s+'_catborradas',JSON.stringify(catborradas));
+						//console.log(localStorage.getItem(usuario_s+'_catborradas'));
+						
+						
+					}
+					else{
+						catborradas = [];
+						catborradas[0] = categoria.servidor_id;
+						localStorage.setItem(usuario_s+'_catborradas',JSON.stringify(catborradas));
+						//console.log(localStorage.getItem(usuario_s+'_catborradas'));
+						
+					}
+            	}
+ 	
+            	
                 categoria.borrar();
                 c.listar(id_usuario, selectCategorias);
             });
@@ -1550,3 +1598,285 @@ function obtenerPosicion(exito,fallo){
     
 }
 
+
+
+
+function Sincronizar(){
+    
+	var url = localStorage.getItem('servidor');
+	var usuario_s = sessionStorage.getItem('user');
+	var usuario_id = sessionStorage.getItem('user-id');
+	
+	
+	var u = new Usuarios();
+	
+	//localStorage.setItem(usuario_s+'_yasincronizado',0);
+	if(localStorage.getItem(usuario_s+'_yasincronizado')!=1){
+		
+		u.consultar(usuario_id,PrimeraSincronizacion);
+	}
+	else{
+		allRegistros(usuario_id,SegundaSincronizacion);
+	}
+	
+	
+	
+	function PrimeraSincronizacion(usuario){
+		
+		
+		c = new Categorias();
+		c.listar(usuario.id,
+			function(categorias){
+				
+				var json_categorias = JSON.stringify(categorias);
+				
+				s = new Sitios();
+				s.listarU(usuario.id,
+					function(sitios){
+						
+						var json_sitios = JSON.stringify(sitios);
+						
+						
+						$.ajax({ 
+							type: "POST", 
+							url: url,
+							timeout: 8000,
+							data: {
+									funcion: "primera_sincronizacion", 
+									usuario: usuario.usuario,
+									pass: usuario.pass,
+									sitios: json_sitios,
+									categorias: json_categorias
+								   },
+			
+							success: function(json_r){
+								respuesta=JSON.parse(json_r);
+								
+								if(respuesta.resultado!="ok"){
+									if(respuesta.resultado=="inexistente"){
+										alert("El usuario no existe");
+									}
+									else{
+										alert("La contraseña es incorrecta");
+									}
+								}
+								else{
+									
+									agregarCategorias(respuesta.categorias_existentes);
+									
+									actualizarCategorias(respuesta.categorias_creadas);
+									
+									agregarAlertas(respuesta.alertas_existentes);
+									
+									agregarCheckpoints(respuesta.checkpoints_existentes);
+									
+									agregarSitios(respuesta.sitios_existentes);
+									
+									actualizarSitios(respuesta.sitios_creados);
+									
+
+									alert("Sincronización con el servidor realizada con exito");
+									
+									localStorage.setItem(usuario_s+'_yasincronizado',1);
+									
+								}
+							
+							},
+							error: function(xml,msg){
+								alert("No fue posible comunicarse con el servidor");
+							}
+						});  
+					}	
+				
+				);
+	
+			}
+				
+		);	
+		
+	}
+	
+	function SegundaSincronizacion(usuario,categorias,sitios,alertas,checkpoints){
+		
+		var json_categorias = JSON.stringify(categorias);
+		var json_sitios = JSON.stringify(sitios);
+		var json_alertas = JSON.stringify(alertas);
+		var json_checkpoints = JSON.stringify(checkpoints);
+		var json_catborradas = localStorage.getItem(usuario.usuario+'_catborradas');
+		var json_sitborrados = localStorage.getItem(usuario.usuario+'_sitborrados');
+		
+		$.ajax({ 
+			type: "POST", 
+			url: url,
+			timeout: 8000,
+			data: {
+					funcion: "segunda_sincronizacion", 
+					usuario: usuario.usuario,
+					pass: usuario.pass,
+					categorias: json_categorias,
+					sitios: json_sitios,
+					alertas: json_alertas,
+					checkpoints: json_checkpoints,
+					catborradas: json_catborradas,
+					sitborrados: json_sitborrados
+				   },
+
+			success: function(json_r){
+				respuesta=JSON.parse(json_r);
+				
+				if(respuesta.resultado!="ok"){
+					if(respuesta.resultado=="inexistente"){
+						alert("El usuario no existe");
+					}
+					else{
+						alert("La contraseña es incorrecta");
+					}
+				}
+				else{
+					
+					actualizarCategorias(respuesta.categorias);
+					
+					actualizarSitios(respuesta.sitios);
+					
+					actualizarAlertas(respuesta.alertas);
+					
+					actualizarCheckpoints(respuesta.checkpoints);
+					
+					agregarAlertas(respuesta.alertas_nuevas);
+					
+					agregarCheckpoints(respuesta.checkpoints_nuevos);
+					
+					localStorage.removeItem(usuario_s+'_sitborrados');
+					localStorage.removeItem(usuario_s+'_catborradas');
+					
+					
+					alert("Sincronización con el servidor realizada con exito");
+					
+				}
+			
+			},
+			error: function(xml,msg){
+				alert("No fue posible comunicarse con el servidor");
+			}
+		});
+		
+	}
+	
+	function agregarCategorias(categorias_existentes){
+		
+		c = new Categorias();	
+		for(i=0;i<categorias_existentes.length;i++){	
+			c.crear(usuario_id,categorias_existentes[i].nombre,categorias_existentes[i].descripcion,categorias_existentes[i].sincronizado,categorias_existentes[i].servidor_id);
+		}
+		
+		
+	}
+	
+	function actualizarCategorias(categorias_creadas){
+		
+		for(i=0;i<categorias_creadas.length;i++){
+			c = new categoria(categorias_creadas[i].id,usuario_id,categorias_creadas[i].nombre,categorias_creadas[i].descripcion,categorias_creadas[i].sincronizado,categorias_creadas[i].servidor_id);
+			c.actualizar();
+		}
+		
+	}
+	
+		
+	function agregarSitios(sitios_existentes){
+		
+		c = new Categorias();
+		c.listar(usuario_id,function(categorias){
+			s = new Sitios();
+			//console.log("Numero de sitios existentes "+sitios_existentes.length);
+			for(i=0;i<sitios_existentes.length;i++){
+				
+				//console.log("Id categoria de servidor es "+sitios_existentes[i].id_categoria+" la posicion del arreglo es "+i);
+					
+				id_categoria = buscar_id_cat(categorias,sitios_existentes[i].id_categoria);
+				
+				//console.log("La id_categoria cliente es "+id_categoria);
+			
+				s.crear(usuario_id,sitios_existentes[i].latitud,sitios_existentes[i].longitud,sitios_existentes[i].fecha,sitios_existentes[i].nombre,sitios_existentes[i].descripcion,sitios_existentes[i].url_imagen,id_categoria,sitios_existentes[i].sincronizado,sitios_existentes[i].servidor_id);
+			}
+		
+		});
+		
+		
+	}
+	
+	function actualizarSitios(sitios_creados){
+		
+		
+		
+		//console.log("Numero de sitios creados "+sitios_creados.length);
+		for(i=0;i<sitios_creados.length;i++){
+			
+			//console.log("El servidor Id del sitio creado es "+sitios_creados[i].servidor_id);
+			
+			if(sitios_creados[i].id_categoria==0){
+				sitios_creados[i].id_categoria=null;
+			}			
+			
+			s = new sitio(sitios_creados[i].id,usuario_id,sitios_creados[i].latitud,sitios_creados[i].longitud,sitios_creados[i].fecha,sitios_creados[i].nombre,sitios_creados[i].descripcion,sitios_creados[i].url_imagen,sitios_creados[i].id_categoria,sitios_creados[i].sincronizado,sitios_creados[i].servidor_id);
+			s.actualizar();
+		}
+	}
+	
+	function agregarCheckpoints(checkpoints_existentes){
+		
+		c = new Checkpoints();	
+		for(i=0;i<checkpoints_existentes.length;i++){
+				
+			c.crear(checkpoints_existentes[i].nombre,checkpoints_existentes[i].latitud,checkpoints_existentes[i].longitud,checkpoints_existentes[i].fecha,checkpoints_existentes[i].descripcion,checkpoints_existentes[i].info,checkpoints_existentes[i].supervisor,checkpoints_existentes[i].url_imagen,usuario_id,checkpoints_existentes[i].sincronizado,checkpoints_existentes[i].checked_in,checkpoints_existentes[i].servidor_id);
+		}
+	
+	}
+	
+	function agregarAlertas(alertas_existentes){
+		
+		a = new Alertas();	
+		for(i=0;i<alertas_existentes.length;i++){	
+			a.crear(usuario_id,alertas_existentes[i].supervisor,alertas_existentes[i].mensaje,alertas_existentes[i].fecha,alertas_existentes[i].visto,alertas_existentes[i].sincronizado,alertas_existentes[i].servidor_id);
+		}
+		
+	}
+	
+	function actualizarAlertas(alertas){
+
+		for(i=0;i<alertas.length;i++){
+			a = new alerta(alertas[i].id,usuario_id,alertas[i].supervisor,alertas[i].mensaje,alertas[i].fecha,alertas[i].visto,alertas[i].sincronizado,alertas[i].servidor_id);
+			a.actualizar();
+		}
+		
+	}
+	
+	function actualizarCheckpoints(checkpoints){
+
+		for(i=0;i<checkpoints.length;i++){
+			c = new checkpoint(checkpoints[i].id,checkpoints[i].nombre,checkpoints[i].latitud,checkpoints[i].longitud,checkpoints[i].fecha,checkpoints[i].descripcion,checkpoints[i].info,checkpoints[i].supervisor,checkpoints[i].url_imagen,usuario_id,checkpoints[i].sincronizado,checkpoints[i].checked_in,checkpoints[i].servidor_id);
+			c.actualizar();
+		}
+		
+	}
+	
+	function buscar_id_cat(categorias,servidor_id){
+		
+		id_categoria=null;
+		console.log("La categoria "+servidor_id);
+		
+		for(j=0;j<categorias.length;j++){
+			if(categorias[j].servidor_id==servidor_id){
+				id_categoria=categorias[j].id;
+			}		
+		}
+		
+		
+		return id_categoria;
+	}
+	
+	
+	
+	
+	
+    
+}

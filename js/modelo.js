@@ -1,36 +1,64 @@
 
-//console.log('modelo5');
+
+//registrosPrueba();
 
 
-if(localStorage.getItem('registros_prueba')!=1){
-
+function registrosPrueba(){
+	if(localStorage.getItem('registros_prueba')!=1){
     
+	    c = new Checkpoints();
+	    
+	    c.crear("Checkpoint 1",10.486688,-66.89476,"11/11/2012 12:00","Plaza La Langosta (Facultad de Ciencias)","","Supervisor1","",2,1,0,121);
+	    c.crear("Checkpoint 2",10.48672,-66.895195,"11/11/2012 12:01","Cafetin (Facultad de Ciencias)","Compra un cachito aqui","Supervisor1","",2,1,0,122);
+	    c.crear("Checkpoint 3",10.486767,-66.893698,"11/11/2012 12:02","Estacionamiento (Facultad de Ciencias)","","Supervisor1","",2,1,0,123);
+	    c.crear("Checkpoint 4",10.4919,-66.890855,"11/11/2012 12:03","Plaza el rectorado (UCV)","","Supervisor1","",2,1,0,124);
+	    c.crear("Checkpoint 5",10.491742,-66.890329,"11/11/2012 12:04","Tierra de Nadie (UCV)","","Supervisor1","",2,1,0,125);
+	    
+	    
+	    a = new Alertas();
+	    
+	    a.crear(2, 'Supervisor1', 'Haz checkpoint en los lugares indicados', '11/11/2012', 0, 1, 121);
+	    a.crear(2, 'Supervisor1', 'Ya se ha reiniciado la contraseña', '12/11/2012', 0, 1, 122);
+	    
+	    localStorage.setItem('registros_prueba', 1);
+	    console.log("Se han creado checkpoints y alertas de prueba");
     
-    
-    
-    c = new Checkpoints();
-    
-    c.crear("Checkpoint 1",10.486688,-66.89476,"11/11/2012 12:00","Plaza La Langosta (Facultad de Ciencias)","","Supervisor1","",2,1,0,121);
-    c.crear("Checkpoint 2",10.48672,-66.895195,"11/11/2012 12:01","Cafetin (Facultad de Ciencias)","Compra un cachito aqui","Supervisor1","",2,1,0,122);
-    c.crear("Checkpoint 3",10.486767,-66.893698,"11/11/2012 12:02","Estacionamiento (Facultad de Ciencias)","","Supervisor1","",2,1,0,123);
-    c.crear("Checkpoint 4",10.4919,-66.890855,"11/11/2012 12:03","Plaza el rectorado (UCV)","","Supervisor1","",2,1,0,124);
-    c.crear("Checkpoint 5",10.491742,-66.890329,"11/11/2012 12:04","Tierra de Nadie (UCV)","","Supervisor1","",2,1,0,125);
-    
-    
-    a = new Alertas();
-    
-    a.crear(2, 'Supervisor1', 'Haz checkpoint en los lugares indicados', '11/11/2012', 0, 1, 121);
-    a.crear(2, 'Supervisor1', 'Ya se ha reiniciado la contraseña', '12/11/2012', 0, 1, 122);
-    
-    localStorage.setItem('registros_prueba', 1);
-    console.log("Se han creado checkpoints y alertas de prueba");
-    
-
-
+	}
 }
 
+/*
+usuario_s = sessionStorage.getItem('user');
+localStorage.removeItem(usuario_s+'_sitborrados');
+localStorage.removeItem(usuario_s+'_catborradas');
+borrarTodo();
+
+* /
+
+/*
+c = new Sitios();
+c.listarU(2,function(sitios){
+	
+	for(i=0;i<sitios.length;i++){
+		console.log("El servidor id es "+ sitios[i].servidor_id);
+	}
 
 
+});*/
+
+function borrarTodo(){
+	
+	var query = "DELETE FROM checkpoints WHERE id_usuario=2";
+	var query2 = "DELETE FROM sitios WHERE id_usuario=2";
+	var query3 = "DELETE FROM categorias WHERE id_usuario=2";
+	var query4 = "DELETE FROM alertas WHERE id_usuario=2";
+	db.transaction(function(tx){
+        tx.executeSql(query);
+        //tx.executeSql(query2);
+        //tx.executeSql(query3);
+        tx.executeSql(query4);
+    })
+	
+}
 
 
 
@@ -101,7 +129,7 @@ function alerta (id, id_usuario, supervisor, mensaje, fecha, visto, sincronizado
 
 function Alertas(){
 
-    //NO ESTA DEFINIDIO QUE EL EL USUARIO CREE ALERTAS, Esta funcion es solo para crear alertas de prueba
+    
     this.crear = function(id_usuario, supervisor, mensaje, fecha, visto, sincronizado, servidor_id){
         
         var query = "INSERT INTO alertas(id_usuario,supervisor,mensaje,fecha,visto,sincronizado, servidor_id) VALUES("+id_usuario+",'"+supervisor+"','"+mensaje+"','"+fecha+"',"+visto+","+sincronizado+","+servidor_id+")";
@@ -111,7 +139,7 @@ function Alertas(){
         
         db.transaction(function(tx){
             tx.executeSql(query);
-            //console.log(query);
+            
         })
     }
     
@@ -169,7 +197,6 @@ function sitio (id, id_usuario, latitud, longitud, fecha, nombre, descripcion, u
    
     this.actualizar = function() {
         
-        //El usuario solo esta permitido a modificar las variables visto y sincronizado
         
         if(this.id_categoria==null){
             id_categoria="null";
@@ -179,7 +206,7 @@ function sitio (id, id_usuario, latitud, longitud, fecha, nombre, descripcion, u
         }
         
         
-        var query = "UPDATE sitios SET nombre='"+this.nombre+"', "+"descripcion='"+this.descripcion+"', "+"id_categoria="+id_categoria+" WHERE id="+this.id;
+        var query = "UPDATE sitios SET nombre='"+this.nombre+"', "+"descripcion='"+this.descripcion+"', "+"id_categoria="+id_categoria+", sincronizado="+this.sincronizado+", servidor_id="+this.servidor_id+" WHERE id="+this.id;
         //console.log(query);
 
         db.transaction(function(tx){
@@ -224,7 +251,7 @@ function Sitios(){
         
         var query = "SELECT * FROM sitios WHERE id_usuario="+id_usuario;
         //console.log(query);
-        return;
+        
         db.transaction(function(tx){
             tx.executeSql(query,[],function(tx,result){
                 n = result.rows.length;
@@ -320,7 +347,7 @@ function categoria (id, id_usuario, nombre, descripcion, sincronizado, servidor_
     this.actualizar = function() {
         
         
-        var query = "UPDATE categorias SET nombre='"+this.nombre+"', "+"descripcion='"+this.descripcion+"' WHERE id="+this.id;
+        var query = "UPDATE categorias SET nombre='"+this.nombre+"', "+"descripcion='"+this.descripcion+"', sincronizado="+this.sincronizado+", servidor_id="+this.servidor_id+" WHERE id="+this.id;
         
         db.transaction(function(tx){
             tx.executeSql(query);
@@ -329,7 +356,7 @@ function categoria (id, id_usuario, nombre, descripcion, sincronizado, servidor_
     
     this.borrar = function() {
         
-        var query1 = "UPDATE sitios SET id_categoria=null WHERE id_categoria="+this.id;
+        var query1 = "UPDATE sitios SET id_categoria=null, sincronizado=0 WHERE id_categoria="+this.id;
         var query2 = "DELETE FROM categorias WHERE id="+this.id;
         
         //console.log(query1);
@@ -346,7 +373,7 @@ function categoria (id, id_usuario, nombre, descripcion, sincronizado, servidor_
 }
 
 
-c = new Categorias();
+//c = new Categorias();
 //c.crear(2,"Prueba2",'Esta es una categoria de prueba',0,null);
 /*
 c.listar(2,function(categorias){
@@ -483,7 +510,7 @@ function Checkpoints(){
         var query = "INSERT INTO checkpoints(nombre, latitud, longitud, fecha, descripcion, info, supervisor, url_imagen, id_usuario, sincronizado, checked_in, servidor_id) VALUES('"+nombre+"',"+latitud+","+longitud+",'"+fecha+"','"+descripcion+"','"+info+"','"+supervisor+"','"+url_imagen+"',"+id_usuario+","+sincronizado+","+checked_in+","+servidor_id+")";
         
         
-        //console.log(query);
+        console.log(query);
         
         
         db.transaction(function(tx){
@@ -544,4 +571,76 @@ function Checkpoints(){
     }    
    
     
+}
+
+
+function usuario (id, usuario, pass) {
+    this.id = id;
+    this.usuario = usuario;
+    this.pass = pass;
+
+ 
+       
+}
+
+
+
+function Usuarios(){
+
+    
+     this.consultar = function(id, callback){
+        
+        var query = "SELECT * FROM usuarios WHERE id="+id;
+        //console.log(query);
+       
+        db.transaction(function(tx){
+            tx.executeSql(query,[],function(tx,result){
+                
+                
+                item = result.rows.item(0);
+                c = new usuario(item.id, item.usuario, item.pass);
+                
+
+                callback(c);
+            
+            });
+      
+            
+        })
+    }    
+   
+    
+}
+
+
+
+function allRegistros(usuario_id,callback){
+	
+	
+	var u = new Usuarios();
+	u.consultar(usuario_id,function(usuario){
+		var c = new Categorias();
+		c.listar(usuario_id,function(categorias){
+			var s = new Sitios();
+			s.listarU(usuario_id,function(sitios){
+				var a = new Alertas();
+				a.listar(usuario_id,function(alertas){
+					var ch = new Checkpoints();
+					ch.listar(usuario_id,function(checkpoints){
+						
+						callback(usuario,categorias,sitios,alertas,checkpoints);
+						
+						
+					});
+				});
+				
+			});
+			
+		});
+	});
+	
+	
+	
+
+	
 }

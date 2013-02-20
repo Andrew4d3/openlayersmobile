@@ -21,4 +21,6 @@
     
     <icon src="icon.png" />
     
+    <access origin="*" />
+    
 </widget>
