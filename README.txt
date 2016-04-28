@@ -1,3 +1,7 @@
+** WARNING - BAD CODE - **
+
+I was a beginner when I was working at this project. I didn't know a lot of this about JavaScript and how to use it. So this project is full of bad code and bad practices. Do not consider it as a reference of how to make a html5 mobile app.
+
 GeoRef 0.0.1
 Proyecto de Tesis de Andrew Davis Escalona.
 
